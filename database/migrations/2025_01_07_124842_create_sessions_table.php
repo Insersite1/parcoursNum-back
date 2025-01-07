@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->text('description');
             $table->string('image')->nullable();
-            $table->dateT('date_debut');
+            $table->date('date_debut');
             $table->date('date_fin');
             $table->string('file');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
