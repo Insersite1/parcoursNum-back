@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateT('date_debut');
             $table->date('date_fin');
             $table->string('file');
-            $table->foreignId('users_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('action_id')->constrained('actions')->onDelete('cascade');
             $table->timestamps();
         });

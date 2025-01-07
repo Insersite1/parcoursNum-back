@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Session extends Model
 {
     use HasFactory;
+    protected $fillable = ['nom', 'image', 'date_debut', 'date_fin','user_id','action_id','description'];
 
 
     public function seances()
