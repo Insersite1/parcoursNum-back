@@ -14,7 +14,7 @@ class Action extends Model
         'place',
         'couverture',
         'user_id',
-        'structure_id',
+        'structureDispositif_id',
         'date_debut',
         'type',
         'couleur',

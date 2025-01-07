@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('dispositifs', function (Blueprint $table) {
             $table->id();
+            $table->String('name');
+            $table->String('couverture')->nullable();
+            $table->Date('DateDebut');
+            $table->Date('DateFin');
+            $table->enum('statut',['Active', 'Inactive'])->default('active');
+            $table->String('pays');
             $table->timestamps();
         });
     }

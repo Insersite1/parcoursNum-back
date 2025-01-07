@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->string('place');
             $table->string('couverture')->nullable();
-            $table->foreignIdFor( \App\Models\Type::class);
+            $table->string( 'type');
             $table->Date('DateDebut');
             $table->Date('DateFin');
             $table->string('description');

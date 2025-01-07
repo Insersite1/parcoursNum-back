@@ -16,7 +16,7 @@ return new class extends Migration
             $table->String('couverture')->nullable();
             $table->String('nomcomplet');
             $table->date('dateExpire');
-            $table->enum('statut',['Active', 'Inactive'])->default('Inactive');
+            $table->enum('statut',['Active', 'Inactive'])->default('active');
             $table->foreignIdFor( \App\Models\Dispositif::class);
             $table->timestamps();
 

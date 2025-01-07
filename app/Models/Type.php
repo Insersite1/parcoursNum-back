@@ -10,13 +10,5 @@ class Type extends Model
     use HasFactory;
     protected $fillable = ['structure_id', 'dispositif_id'];
 
-    public function structure()
-    {
-        return $this->belongsTo(Structure::class);
-    }
-
-    public function dispositif()
-    {
-        return $this->belongsTo(Dispositif::class);
-    }
+   
 }

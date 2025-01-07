@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->text('description');
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->dateT('date_debut');
             $table->date('date_fin');
+            $table->string('file');
             $table->foreignId('users_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('action_id')->constrained('actions')->onDelete('cascade');
             $table->timestamps();

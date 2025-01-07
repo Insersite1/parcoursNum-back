@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-    
+
             'avatar',
             'nomComplet',
             'email',
@@ -36,9 +36,20 @@ class User extends Authenticatable
             'EPC',
             'API',
             'AE',
-            'Adresse'
+            'Adresse',
+            'structure_id'
 
     ];
+
+    public function structure()
+    {
+        return $this->belongsTo(Structure::class,'structure_id');
+    }
+
+    public function session()
+    {
+        return $this->hasMany(Action::class,'session_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

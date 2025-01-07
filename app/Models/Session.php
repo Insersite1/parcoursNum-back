@@ -14,4 +14,13 @@ class Session extends Model
     {
         return $this->hasMany(Sceance::class,'seance_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(Structure::class,'user_id');
+    }
+    public function action()
+    {
+        return $this->belongsTo(Action::class,'action_id');
+    }
 }

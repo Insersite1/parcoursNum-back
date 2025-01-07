@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Structure extends Model
 {
     use HasFactory;
-    protected $fillable = ['couverture', 'nomcomplet', 'dateExpire', 'statut', 'dispositif_id'];
+    protected $fillable = ['couverture', 'nomcomplet', 'dateExpire', 'statut'];
 
-    public function dispositif()
+
+
+    public function user()
     {
-        return $this->belongsTo(Dispositif::class, 'dispositif_id');
+        return $this->hasMany(User::class,'user_id');
+    }
+
+    public function structureDispositif()
+    {
+        return $this->hasMany(StructureDispositif::class,'structureDispositif_id');
     }
 }
