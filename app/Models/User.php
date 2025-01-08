@@ -76,7 +76,7 @@ public function dispositif()
     }
     public function session()
     {
-        return $this->hasMany(Action::class,'session_id');
+        return $this->hasMany(Action::class,'action_id');
     }
 
    
