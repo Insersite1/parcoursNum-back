@@ -20,7 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
 
             'avatar',
-            'nomComplet',
+            'nom',
+            'Prenom',
             'email',
             'numTelephone',
             'email_verified_at',
@@ -37,6 +38,7 @@ class User extends Authenticatable
             'API',
             'AE',
             'Adresse',
+            'role_id',
             'structure_id'
 
     ];
@@ -46,6 +48,10 @@ class User extends Authenticatable
         return $this->belongsTo(Structure::class,'structure_id');
     }
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class,'role_id');
+    }
     public function session()
     {
         return $this->hasMany(Action::class,'session_id');
