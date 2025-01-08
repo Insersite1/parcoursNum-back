@@ -46,9 +46,9 @@ class User extends Authenticatable
         return $this->belongsTo(Structure::class,'structure_id');
     }
 
-    public function session()
+    public function action()
     {
-        return $this->hasMany(Action::class,'session_id');
+        return $this->hasMany(Action::class,'action_id');
     }
 
     /**

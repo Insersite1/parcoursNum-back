@@ -20,6 +20,7 @@ class Action extends Model
         'couleur',
         'date_fin',
         'desciption',
+        'auteur'
         ];
 
         Public function user()
