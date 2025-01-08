@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->text('description');
+            $table->string('nom')->nullable();
+            $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->date('date_debut');
             $table->date('date_fin');
-            $table->string('file');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('action_id')->constrained('actions')->onDelete('cascade');
+            $table->string('file')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('action_id')->nullable()->constrained('actions')->onDelete('cascade');
             $table->timestamps();
         });
     }
