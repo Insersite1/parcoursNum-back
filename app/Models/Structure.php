@@ -22,9 +22,9 @@ class Structure extends Model
         return $this->hasMany(referant::class,'user_id');
     }
 
-    public function structureDispositif()
+    public function dispositifs()
     {
-        return $this->hasMany(StructureDispositif::class,'structureDispositif_id');
+        return $this->belongsToMany(Dispositif::class, 'structure_dispositif');
     }
 
 }

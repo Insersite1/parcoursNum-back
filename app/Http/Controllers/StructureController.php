@@ -116,12 +116,15 @@ class StructureController extends Controller
      */
     public function addDispositifStructure(Request $request, $structureId)
     {
+        // Valider les données entrantes
         $validated = $request->validate([
-            'dispositif_id' => 'required|exists:dispositifs,id',
+            'dispositif_id' => 'required|exists:dispositifs,id', // Vérifie que le dispositif existe
         ]);
 
+        // Vérifie que la structure existe
         $structure = Structure::findOrFail($structureId);
 
+        // Vérifier si l'association existe déjà
         $exists = StructureDispositif::where('structure_id', $structureId)
             ->where('dispositif_id', $validated['dispositif_id'])
             ->exists();
@@ -129,9 +132,10 @@ class StructureController extends Controller
         if ($exists) {
             return response()->json([
                 'message' => 'Le dispositif est déjà associé à cette structure.',
-            ], 409);
+            ], 409); // Code 409 : Conflit
         }
 
+        // Créer l'association
         $structureDispositif = StructureDispositif::create([
             'structure_id' => $structureId,
             'dispositif_id' => $validated['dispositif_id'],
@@ -140,153 +144,41 @@ class StructureController extends Controller
         return response()->json([
             'message' => 'Dispositif ajouté avec succès à la structure.',
             'data' => $structureDispositif,
-        ], 201);
+        ], 201); // Code 201 : Ressource créée
     }
 
-    /**
-     * Description: Récupérer les dispositifs associés à une structure.
-     * Méthode: GET
-     * Entrée: ID de la structure.
-     * Sortie: Liste des dispositifs avec status 200,
-     * ou message indiquant qu'aucun dispositif n'a été trouvé.
-     */
+
+    // Récupérer les dispositifs d'une structure
+
     public function getDispositifsForStructure($structureId)
     {
+        // Vérifier si la structure existe
         $structure = Structure::find($structureId);
 
         if (!$structure) {
-            return response()->json(['error' => 'Structure non trouvée'], 404);
+            return response()->json(['error' => 'Structure not found'], 404);
         }
 
+        // Récupérer les dispositifs via la table de jonction
         $dispositifs = StructureDispositif::where('structure_id', $structureId)
             ->join('dispositifs', 'structure_dispositifs.dispositif_id', '=', 'dispositifs.id')
-            ->select('dispositifs.*')
+            ->select('dispositifs.*') // Sélectionner uniquement les colonnes de la table dispositifs
             ->get();
 
+        // Vérifier si des dispositifs existent pour cette structure
         if ($dispositifs->isEmpty()) {
             return response()->json([
                 'message' => 'Aucun dispositif trouvé pour cette structure.',
-                'data' => [],
+                'data' => []
             ], 200);
         }
 
+        // Retourner la réponse avec la liste des dispositifs
         return response()->json([
-            'message' => 'Liste des dispositifs pour la structure donnée.',
-            'data' => $dispositifs,
+            'message' => 'Liste des dispositifs pour la structure donnée',
+            'data' => $dispositifs
         ], 200);
     }
 
-    /**
-     * Description: Mettre à jour une structure existante.
-     * Méthode: PUT/PATCH
-     * Entrée: Données partiellement ou complètement mises à jour.
-     * Sortie: Structure mise à jour avec status 200.
-     */
-    public function update(Request $request, $id)
-    {
-        try {
-            // Validation des données
-            $validatedData = $request->validate([
-                'nomcomplet' => 'nullable|string|max:255',
-                'dateExpire' => 'nullable|date',
-                'statut' => 'nullable|in:Active,Inactive',
-                'couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
 
-            // Récupération de la structure existante
-            $structure = Structure::findOrFail($id);
-
-            // Si un fichier de couverture est présent, on le traite
-            if ($request->hasFile('couverture')) {
-                $couverture = $request->file('couverture');
-                $imageName = time() . '.' . $couverture->extension();
-                $couverture->move(public_path('images'), $imageName);
-                $structure->couverture = $imageName; // Mise à jour du nom de l'image dans la DB
-            }
-
-            // Mise à jour des autres champs
-            $structure->nomcomplet = $validatedData['nomcomplet'] ?? $structure->nomcomplet;
-            $structure->dateExpire = $validatedData['dateExpire'] ?? $structure->dateExpire;
-            $structure->statut = $validatedData['statut'] ?? $structure->statut;
-
-            // Sauvegarde des modifications
-            $structure->save();
-
-            // Actualisation des données et réponse
-            return response()->json([
-                'message' => 'Structure mise à jour avec succès.',
-                'structure' => $structure,
-            ], 200);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Erreur de validation.',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Une erreur est survenue lors de la mise à jour de la structure.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Description: Supprimer une structure.
-     * Méthode: DELETE
-     * Entrée: ID de la structure.
-     * Sortie: Message de confirmation avec status 200,
-     * ou message d'erreur avec status 404 si non trouvée.
-     */
-    public function destroy($id)
-    {
-        $structure = Structure::find($id);
-
-        if (!$structure) {
-            return response()->json(['message' => 'Structure non trouvée'], 404);
-        }
-
-        $structure->delete();
-
-        return response()->json(['message' => 'Structure supprimée avec succès'], 200);
-    }
-
-    /**
-     * Description: Rechercher des structures par mot-clé.
-     * Méthode: GET
-     * Entrée: Mot-clé pour recherche (nomcomplet, statut, dateExpire).
-     * Sortie: Liste des structures correspondantes.
-     */
-    public function search($search)
-    {
-        $structures = Structure::query()
-            ->where('nomcomplet', 'LIKE', '%' . $search . '%')
-            ->orWhere('statut', 'LIKE', '%' . $search . '%')
-            ->orWhere('dateExpire', 'LIKE', '%' . $search . '%')
-            ->get();
-
-        return response()->json($structures);
-    }
-
-    /**
-     * Description: Mettre à jour le statut d'une structure.
-     * Méthode: PATCH
-     * Entrée: id Structure
-     * Sortie: Structure mise à jour avec status 200.
-     */
-    public function updatestructureetat($id)
-    {
-        $structure = Structure::find($id);
-        if ($structure) {
-            if ($structure->statut == 'Active') {
-                $structure->statut = 'Inactive';
-            } elseif ($structure->statut == 'Inactive') {
-                $structure->statut = 'Active';
-            }
-            $structure->save();
-            return response()->json(['message' => 'État mis à jour avec succès.'], 200);
-        } else {
-            return response()->json(['error' => 'referent introuvable.'], 404);
-        }
-    }
 }
