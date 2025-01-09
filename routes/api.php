@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
+use App\Http\Controllers\SceanceController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -84,3 +86,4 @@ Route::resource('referants', controller: \App\Http\Controllers\ReferantControlle
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);

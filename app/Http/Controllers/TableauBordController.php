@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Action;
 
 class TableauBordController extends Controller
 {
@@ -66,14 +67,15 @@ class TableauBordController extends Controller
 
     public function getCounts()
     {
+        $role = 'jeune';
         // Obtenez les totaux pour chaque attribut
         $counts = [
-            'EPC' => User::whereNotNull('EPC')->count(),
-            'ETH' => User::whereNotNull('ETH')->count(),
-            'API' => User::whereNotNull('API')->count(),
-            'ZRR' => User::whereNotNull('ZRR')->count(),
-            'AE'  => User::whereNotNull('AE')->count(),
-            'QP'  => User::whereNotNull('QP')->count(),
+            'EPC' => User::where('role', $role)->whereNotNull('EPC')->count(),
+            'ETH' => User::where('role', $role)->whereNotNull('ETH')->count(),
+            'API' => User::where('role', $role)->whereNotNull('API')->count(),
+            'ZRR' => User::where('role', $role)->whereNotNull('ZRR')->count(),
+            'AE'  => User::where('role', $role)->whereNotNull('AE')->count(),
+            'QP'  => User::where('role', $role)->whereNotNull('QP')->count(),
         ];
     
         // Retournez les résultats sous forme de réponse JSON
@@ -161,7 +163,8 @@ class TableauBordController extends Controller
 
     public function getUsersByRegion()
     {
-        $usersByRegion = User::selectRaw('region, COUNT(*) as user_count')
+        $usersByRegion = User::where('role', 'jeune')
+            ->select('region', \DB::raw('COUNT(*) as nombre'))
             ->groupBy('region')
             ->get();
 
@@ -169,11 +172,29 @@ class TableauBordController extends Controller
         $formattedResult = $usersByRegion->map(function ($item) {
             return [
                 'region' => $item->region,
-                'user_count' => $item->user_count,
+                'nombre' => $item->nombre,
             ];
         });
 
         return response()->json($formattedResult);
+    }
+
+    public function getJeunesByAction()
+    {
+        // Récupérer les actions avec le nombre de jeunes associés
+        $result = Action::withCount(['actionUsers as jeunes_count' => function ($query) {
+            $query->whereHas('user', function ($q) {
+                $q->where('role', 'jeune'); // Filtrer les utilisateurs par profil "jeune"
+            });
+        }])->get()->map(function ($action) {
+            return [
+                'action_name' => $action->nom, // Nom de l'action
+                'jeunes_count' => $action->jeunes_count // Nombre de jeunes
+            ];
+        });
+    
+        // Retourner le tableau
+        return response()->json($result);
     }
     
 }
