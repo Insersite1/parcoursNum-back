@@ -23,6 +23,10 @@ Route::apiResource('sceances', SceanceController::class);
 //session
 Route::apiResource('sessions', SessionController::class);
 
+// Route de recherche de session
+//Route::get('sessions/search', [SessionController::class, 'search']);
+Route::get('sessions/find/{search}', [SessionController::class, 'search']);
+
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
