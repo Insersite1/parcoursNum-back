@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DispositifController;
+use App\Http\Controllers\JeuneController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\StructureDispositifController;
 use Illuminate\Http\Request;

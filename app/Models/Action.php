@@ -9,7 +9,7 @@ class Action extends Model
 {
     use HasFactory;
 
-    protected$fillable=[
+    protected $fillable=[
         'nom',
         'place',
         'couverture',
@@ -19,17 +19,25 @@ class Action extends Model
         'type',
         'couleur',
         'date_fin',
-        'desciption',
+        'description',
         'auteur'
         ];
 
-        Public function user()
-        {
-            return $this->belongsTo(User::class,'user_id');
-        }
+    /**
+     * Relation avec le modèle StructureDispositif
+     */
+    public function structureDispositif()
+    {
+        return $this->belongsTo(StructureDispositif::class, 'structureDispositif_id');
+    }
 
-        Public function structureDispositif()
-        {
-            return $this->belongsTo(StructureDispositif::class,'structureDispositif_id');
-        }
+    /**
+     * Relation avec le modèle User
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+
 }

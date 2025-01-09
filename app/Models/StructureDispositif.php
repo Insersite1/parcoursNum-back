@@ -11,9 +11,9 @@ class StructureDispositif extends Model
 
     protected $fillable = ['structure_id', 'dispositif_id'];
 
-    public function action()
+    public function actions()
     {
-        return $this->hasMany(Action::class,'action_id');
+        return $this->hasMany(Action::class, 'structureDispositif_id');
     }
 
     public function structure()
