@@ -46,9 +46,12 @@ class User extends Authenticatable
         return $this->belongsTo(Structure::class,'structure_id');
     }
 
-    public function action()
+    /**
+     * Relation avec le modèle Action
+     */
+    public function actions()
     {
-        return $this->hasMany(Action::class,'action_id');
+        return $this->hasMany(Action::class, 'user_id');
     }
 
     /**
