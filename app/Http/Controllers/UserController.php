@@ -13,13 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        try {
-            $users = User::with('role', 'structure')->get();
-            return response()->json($users);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-
-        }
+        
 
     }
 

@@ -67,3 +67,12 @@ Route::post('/structures/{structure}/add-dispositif', [StructureController::clas
 Route::get('structures/{structureId}/dispositifs', [StructureController::class, 'getDispositifsForStructure']);
 
 
+//Manager
+
+Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
+//Jeune
+
+Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
+
+Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
+

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('numTelephone');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('statut',['Active', 'Inactive'])->default('active');
+            $table->enum('statut',['Active', 'Inactive'])->default('Active');
             $table->string('situation')->nullable();
             $table->enum('sexe',['M', 'F'])->nullable();
             $table->string('etatCivil')->nullable();
@@ -37,8 +37,9 @@ return new class extends Migration
             $table->string('codePostal')->nullable();
             $table->string('region')->nullable();
             $table->string('ville')->nullable();
+            $table->string('NumSecuriteSocial')->nullable();
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-            $table->foreignIdFor( \App\Models\Structure::class);
+            $table->foreignIdFor( \App\Models\Structure::class)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
