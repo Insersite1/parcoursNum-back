@@ -3,6 +3,7 @@
 use App\Http\Controllers\SceanceController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
 
 /*
