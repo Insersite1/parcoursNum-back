@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\JeuneController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //Jeune
 
 Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
+
+Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
+
 
 
 
