@@ -3,64 +3,141 @@
 namespace App\Http\Controllers;
 
 use App\Models\Action;
-use App\Http\Requests\StoreActionRequest;
-use App\Http\Requests\UpdateActionRequest;
+use App\Models\StructureDispositif;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ActionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Liste paginée des actions.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        // Nombre d'actions par page (par défaut : 10)
+        $perPage = $request->get('per_page', 10);
+
+        // Récupérer les actions paginées avec les relations nécessaires
+        $actions = Action::with(['structureDispositif', 'user'])->paginate($perPage);
+
+        // Retourner la réponse JSON avec pagination
+        return response()->json([
+            'data' => $actions->items(),
+            'total_pages' => $actions->lastPage(),
+            'current_page' => $actions->currentPage(),
+            'per_page' => $actions->perPage(),
+            'total_items' => $actions->total()
+        ], 200);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Afficher une action spécifique.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function show($id)
     {
-        //
+        $action = Action::with(['structureDispositif', 'user'])->find($id);
+
+        if (!$action) {
+            return response()->json(['message' => 'Action non trouvée'], 404);
+        }
+
+        return response()->json($action, 200);
+    }
+
+
+    /**
+     * Créer une nouvelle action.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'titre' => 'required|string|max:255',
+            'description' => 'required|string',
+            'structure_dispositif_id' => 'required|exists:structure_dispositifs,id',
+            'user_id' => 'required|exists:users,id',
+            'fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        // Gérer le fichier s'il existe
+        if ($request->hasFile('fichier')) {
+            $filePath = $request->file('fichier')->store('actions_files');
+            $validatedData['fichier'] = $filePath;
+        }
+
+        $action = Action::create($validatedData);
+
+        return response()->json($action, 201);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Mettre à jour une action existante.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreActionRequest $request)
+    public function update(Request $request, $id)
     {
-        //
+        $action = Action::find($id);
+
+        if (!$action) {
+            return response()->json(['message' => 'Action non trouvée'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'titre' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'structure_dispositif_id' => 'sometimes|required|exists:structure_dispositifs,id',
+            'user_id' => 'sometimes|required|exists:users,id',
+            'fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        // Gérer le fichier s'il existe
+        if ($request->hasFile('fichier')) {
+            // Supprimer l'ancien fichier
+            if ($action->fichier) {
+                Storage::delete($action->fichier);
+            }
+            $filePath = $request->file('fichier')->store('actions_files');
+            $validatedData['fichier'] = $filePath;
+        }
+
+        $action->update($validatedData);
+
+        return response()->json($action, 200);
     }
 
     /**
-     * Display the specified resource.
+     * Supprimer une action.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Action $action)
+    public function destroy($id)
     {
-        //
-    }
+        $action = Action::find($id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Action $action)
-    {
-        //
-    }
+        if (!$action) {
+            return response()->json(['message' => 'Action non trouvée'], 404);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateActionRequest $request, Action $action)
-    {
-        //
-    }
+        // Supprimer le fichier associé s'il existe
+        if ($action->fichier) {
+            Storage::delete($action->fichier);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Action $action)
-    {
-        //
+        $action->delete();
+
+        return response()->json(['message' => 'Action supprimée avec succès'], 200);
     }
 }

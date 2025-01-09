@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('structures', function (Blueprint $table) {
+        Schema::create('action_user', function (Blueprint $table) {
             $table->id();
-            $table->String('couverture')->nullable();
-            $table->String('nomcomplet');
-            $table->date('dateExpire');
-            $table->enum('statut',['Active', 'Inactive'])->default('Active');
+            $table->foreignIdFor( \App\Models\Action::class);
+            $table->foreignIdFor( \App\Models\User::class);
             $table->timestamps();
-
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('structures');
+        Schema::dropIfExists('action_user');
     }
 };
