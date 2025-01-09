@@ -7,7 +7,7 @@ use App\Http\Controllers\StructureDispositifController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\TableauBordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -79,3 +79,8 @@ Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'
 //Référent
 Route::resource('referants', controller: \App\Http\Controllers\ReferantController::class);
 
+//Dashboard
+
+Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
+Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
+Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
