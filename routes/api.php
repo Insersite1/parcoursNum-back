@@ -33,3 +33,5 @@ Route::apiResource('/Structure',controller: \App\Http\Controllers\StructureContr
 //Manager
 
 Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
+Route::resource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
