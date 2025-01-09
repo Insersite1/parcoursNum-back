@@ -15,8 +15,8 @@ class AuthController extends Controller
          'password' => 'required|confirmed',
      ]);
 
-     $data['password'] = Hash::make(request->input(key: 'password'));
-     User::create($data);
+     $data['password'] = Hash::make($request->input(key: 'password'));
+        $user = User::create($data);
 
         return response()->json([
 
