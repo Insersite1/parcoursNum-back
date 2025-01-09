@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,3 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+//session
+Route::apiResource('sessions', SessionController::class);
+// Route de recherche de session
+//Route::get('sessions/search', [SessionController::class, 'search']);
+Route::get('sessions/find/{search}', [SessionController::class, 'search']);

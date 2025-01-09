@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Session extends Model
 {
     use HasFactory;
-    protected $fillable = ['nom', 'image', 'date_debut', 'date_fin','user_id','action_id','description'];
+    protected $fillable = ['nom', 'image', 'date_debut', 'date_fin','file','par','action_id','description'];
 
 
     public function seances()
@@ -16,10 +16,6 @@ class Session extends Model
         return $this->hasMany(Sceance::class,'seance_id');
     }
 
-    public function user()
-    {
-        return $this->belongsTo(Structure::class,'user_id');
-    }
     public function action()
     {
         return $this->belongsTo(Action::class,'action_id');
