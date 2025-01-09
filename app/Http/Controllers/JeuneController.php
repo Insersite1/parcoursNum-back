@@ -50,9 +50,9 @@ class JeuneController extends Controller
                 'Prenom' => 'nullable|string',
                 'email' => 'required|string|email|unique:users',
                 'numTelephone' => 'required|string',
-                'password' => 'required',
                 'dateNaissance' => 'nullable|date',
-                'role_id' => 'required|exists:roles,id',
+                'role_id' => 'exists:roles,id',
+                'sexe' => 'required|string',
 
             ]);
 
@@ -75,7 +75,7 @@ class JeuneController extends Controller
             $user->dateNaissance = $validatedData['dateNaissance'];
             $user->statut = 'Active';
             $user->role_id = 2;
-
+            $user->sexe = $validatedData['sexe'];
             $user->confirmation_token = Str::random(60);
             $user->save();
 

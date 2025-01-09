@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Manager;
+use App\Http\Requests\StoreManagerRequest;
+use App\Http\Requests\UpdateManagerRequest;
+use App\Models\User;
+use Exception;
+use Illuminate\Http\Request;
+
+
+class ManagerController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try {
+            $users = User::with('role', 'structure')->get();
+            return response()->json($users);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage());
+
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+{
+    try {
+        // Validation des données reçues
+        $request->validate([
+            'nom' => 'required|string',
+            'Prenom' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            // 'password' => 'required',
+            'numTelephone' => 'required|string|max:15',
+            'avatar' => 'mimes:jpeg,png,jpg,gif',
+            'structure_id' => 'required|exists:structures,id',
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        // Création d'un utilisateur
+        $user = new User();
+
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '.' . $avatar->extension();
+            $avatar->move(public_path('images'), $avatarName);
+            $user->image = $avatarName;
+        }
+
+        $user->nom = $request->nom;
+        $user->Prenom = $request->Prenom;
+        $user->email = $request->email;
+        $user->password = 'passer123';
+        $user->statut = 'Active';
+        $user->numTelephone = $request->numTelephone;
+        $user->role_id = $request->role_id;
+        $user->structure_id = $request->structure_id;
+
+        // Sauvegarder dans la base de données
+        $user->save();
+
+        // Réponse JSON
+        return response()->json([
+            'message' => 'Utilisateur créé avec succès',
+            'user' => $user,
+        ], 201);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Gérer les erreurs de validation
+        return response()->json([
+            'message' => 'Erreur de validation',
+            'errors' => $e->errors(),
+        ], 422);
+    } catch (Exception $e) {
+        // Gérer d'autres exceptions générales
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la création de l\'utilisateur',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Manager $manager)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Manager $manager)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateManagerRequest $request, Manager $manager)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Manager $manager)
+    {
+        //
+    }
+}

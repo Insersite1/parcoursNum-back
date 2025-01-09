@@ -59,25 +59,54 @@ class ActionController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
-    {
+{
+    try {
+        // Validation des données
         $validatedData = $request->validate([
-            'titre' => 'required|string|max:255',
+            'nom' => 'required|string',
+            'place' => 'required|string',
+            'couverture' => 'nullable|mimes:jpeg,png,jpg',
+            'type' => 'required|string',
+            'DateDebut' => 'required|date',
+            'DateFin' => 'required|date|after_or_equal:DateDebut',
             'description' => 'required|string',
-            'structure_dispositif_id' => 'required|exists:structure_dispositifs,id',
+            'couleur' => 'required|string',
             'user_id' => 'required|exists:users,id',
-            'fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'structure_dispositif_id' => 'required|exists:structure_dispositifs,id',
         ]);
 
-        // Gérer le fichier s'il existe
-        if ($request->hasFile('fichier')) {
-            $filePath = $request->file('fichier')->store('actions_files');
-            $validatedData['fichier'] = $filePath;
+        // Création de l'instance d'Action
+        $action = new Action();
+
+        $action->nom = $validatedData['nom'];
+        $action->place = $validatedData['place'];
+        $action->type = $validatedData['type'];
+        $action->DateDebut = $validatedData['DateDebut'];
+        $action->DateFin = $validatedData['DateFin'];
+        $action->description = $validatedData['description'];
+        $action->couleur = $validatedData['couleur'];
+        $action->user_id = $validatedData['user_id'];
+        $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
+
+        // Gestion de l'image de couverture
+        if ($request->hasFile('couverture')) {
+            $file = $request->file('couverture');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images'), $fileName);
+            $action->couverture = $fileName;
         }
 
-        $action = Action::create($validatedData);
+        // Sauvegarde de l'action
+        $action->save();
 
-        return response()->json($action, 201);
-    }
+        return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'action.', 'error' => $e->getMessage()], 500);
+            }
+}
+
 
     /**
      * Mettre à jour une action existante.

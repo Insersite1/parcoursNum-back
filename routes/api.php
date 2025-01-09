@@ -6,6 +6,9 @@ use App\Http\Controllers\StructureController;
 use App\Http\Controllers\StructureDispositifController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SceanceController;
+use App\Http\Controllers\ManagerController;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
 /*
@@ -39,7 +42,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 /// Action
-Route::post('/actions', [\App\Http\Controllers\ActionController::class, 'actions']);
+
+Route::apiResource('/actions', controller: \App\Http\Controllers\ActionController::class);
+
 
 //////////////Dispositif///////////
 
@@ -69,7 +74,9 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 
 //Manager
 
-Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
+Route::apiResource('/Manager', ManagerController::class);
+
+
 //Jeune
 
 Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
