@@ -130,7 +130,7 @@ class SceanceController extends Controller
                 'description' => 'nullable|string',
                 'date_debut' => 'required|date',
                 'date_fin' => 'required|date|after_or_equal:date_debut',
-                'session_id' => 'required|exists:sessions,id', // Relation clé étrangère
+                'session_id' => 'nullable|exists:sessions,id', // Relation clé étrangère
                 'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
