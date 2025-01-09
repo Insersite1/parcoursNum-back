@@ -43,10 +43,17 @@ class User extends Authenticatable
 
     ];
 
-    public function structure()
+    /*public function structure()
     {
         return $this->hasMany(User::class, 'structure_id');
+    }*/
+
+    public function structure()
+    {
+        return $this->belongsTo(Structure::class, 'structure_id');
     }
+
+    
 
     /**
      * Relation avec le modèle Action

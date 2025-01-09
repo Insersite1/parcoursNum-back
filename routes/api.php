@@ -84,3 +84,4 @@ Route::resource('referants', controller: \App\Http\Controllers\ReferantControlle
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
