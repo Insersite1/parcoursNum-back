@@ -9,4 +9,5 @@ class Dispositif extends Model
 {
     use HasFactory;
     protected $fillable = ['couverture', 'name', 'DateDebut', 'statut', 'DateFin','pays'];
+
 }

@@ -48,6 +48,10 @@ class User extends Authenticatable
         return $this->belongsTo(Structure::class,'structure_id');
     }
 
+    public function action()
+    {
+        return $this->hasMany(Action::class,'action_id');
+    }
     public function role()
     {
         return $this->belongsTo(Role::class,'role_id');
