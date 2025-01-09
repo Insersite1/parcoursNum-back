@@ -76,3 +76,6 @@ Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::c
 
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 
+//Référent
+Route::resource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
