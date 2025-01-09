@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //Jeune
 
-Route::apiResource('/Jeune',controller: \App\Http\Controllers\UserController::class);
+Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
 
 
 
