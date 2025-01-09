@@ -64,7 +64,7 @@ class JeuneController extends Controller
                 $avatar = $request->file('avatar');
                 $avatarName = time() . '.' . $avatar->extension();
                 $avatar->move(public_path('images'), $avatarName);
-                $user->image = $avatarName;
+                $user->avatar = $avatarName;
             }
 
             $user->nom = $validatedData['nom'];
