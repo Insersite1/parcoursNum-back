@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\TableauBordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-});
+});*/
+
+
+Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
+Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
+Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
