@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ManagerSeeder extends Seeder
 {
@@ -12,6 +13,31 @@ class ManagerSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        DB::table('users')->insert([
+            [
+                'nom' => 'Doe3',
+                'Prenom' => 'John3',
+                'email' => 'manager@example.com',
+                'password' => Hash::make('manager123'),
+                'statut' => 'Active',
+                'numTelephone' => '123456789',
+                'role_id' => 3,
+                'structure_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nom' => 'Smith',
+                'Prenom' => 'Jane',
+                'email' => 'manager2@example.com',
+                'password' => Hash::make('manager456'),
+                'statut' => 'Active',
+                'numTelephone' => '987654321',
+                'role_id' => 3,
+                'structure_id' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }
