@@ -176,7 +176,7 @@ class JeuneController extends Controller
     public function update(Request $request, $id)
 {
     try {
-        // Validation des données
+        
         $validatedData = $request->validate([
             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
             'nom' => 'nullable|string',
@@ -190,9 +190,9 @@ class JeuneController extends Controller
 
         $user = User::findOrFail($id);
 
-        // Mettre à jour l'avatar si présent
+
         if ($request->hasFile('avatar')) {
-            // Supprimer l'avatar existant (si nécessaire)
+
             if ($user->avatar) {
                 unlink(public_path('images') . '/' . $user->avatar);
             }
