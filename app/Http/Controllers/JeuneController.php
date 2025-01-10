@@ -7,6 +7,7 @@ use App\Models\Jeune;
 use App\Http\Requests\StoreJeuneRequest;
 use App\Http\Requests\UpdateJeuneRequest;
 use App\Models\User;
+use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -137,18 +138,37 @@ class JeuneController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Jeune $jeune)
+    public function show($id)
     {
-        //
+        try {
+
+            $user = User::with('role', 'structure')->findOrFail($id);
+
+
+            return response()->json([
+                'message' => 'Utilisateur trouvé avec succès.',
+                'user' => $user
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'message' => 'Utilisateur non trouvé.'
+            ], 404);
+        } catch (Exception $e) {
+
+            return response()->json([
+                'message' => 'Une erreur est survenue.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Jeune $jeune)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
@@ -198,7 +218,7 @@ class JeuneController extends Controller
 
         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
     } catch (Exception $e) {
-        
+
         return response()->json(['message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.', 'error' => $e->getMessage()], 500);
     }
 }
@@ -225,5 +245,32 @@ class JeuneController extends Controller
         return response()->json(['message' => 'Une erreur est survenue lors de la suppression de l\'utilisateur.', 'error' => $e->getMessage()], 500);
     }
 }
+
+        //récupérer le rôle d'un utilisateur
+
+        public function getRoleByUserId($roleId)
+        {
+            try {
+
+                $role = Role::findOrFail($roleId);
+
+                $roleName = $role->name;
+                return response()->json([
+                    'message' => 'Rôle trouvé avec succès.',
+                    'role' => $roleName
+                ], 200);
+
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'message' => 'Utilisateur non trouvé.'
+                ], 404);
+            } catch (Exception $e) {
+                return response()->json([
+                    'message' => 'Une erreur est survenue.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+
 
 }
