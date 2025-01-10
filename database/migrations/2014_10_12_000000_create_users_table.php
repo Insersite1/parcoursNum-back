@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('numTelephone');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('statut',['Active', 'Inactive'])->default('active');
+            $table->enum('statut',['Active', 'Inactive'])->default('Active');
             $table->string('situation')->nullable();
             $table->enum('sexe',['M', 'F'])->nullable();
             $table->string('etatCivil')->nullable();
