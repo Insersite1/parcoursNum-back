@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Action;
+use App\Models\Role;
+use App\Models\Dispositif;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class TableauBordController extends Controller
 {
@@ -75,16 +79,16 @@ class TableauBordController extends Controller
             'AE'  => User::where('role', $role)->whereNotNull('AE')->count(),
             'QP'  => User::where('role', $role)->whereNotNull('QP')->count(),
         ];
-    
+
         // Retournez les résultats sous forme de réponse JSON
         return response()->json($counts);
     }
-     
+
 
     public function getYouthStatistics()
     {
         $currentDate = Carbon::now();
-    
+
         $statistics = [
             'M' => [
                 'under_14' => User::where('sexe', 'M')
@@ -155,7 +159,7 @@ class TableauBordController extends Controller
                     ->count(),
             ]
         ];
-    
+
         return response()->json($statistics);
     }
 
@@ -190,7 +194,7 @@ class TableauBordController extends Controller
                 'jeunes_count' => $action->jeunes_count // Nombre de jeunes
             ];
         });
-    
+
         // Retourner le tableau
         return response()->json($result);
     }
@@ -224,5 +228,5 @@ class TableauBordController extends Controller
 
         return response()->json($resultats);
     }
-    
+
 }
