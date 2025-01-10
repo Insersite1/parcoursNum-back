@@ -35,7 +35,22 @@ Route::apiResource('sessions', SessionController::class);
 //Route::get('sessions/search', [SessionController::class, 'search']);
 Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
+/////Midellware//////
+Route::middleware(['super_admin'])->group(function () {
+    // Routes accessibles uniquement par le super_admin
+});
 
+Route::middleware(['super_admin_manager'])->group(function () {
+    // Routes accessibles par le super_admin et le manager
+});
+
+Route::middleware(['super_admin_manager_referant'])->group(function () {
+    // Routes accessibles aux super_admins, managers et référents
+});
+
+Route::middleware(['jeune'])->group(function () {
+    // Routes accessibles aux jeunes
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -51,7 +66,7 @@ Route::apiResource('/actions', controller: \App\Http\Controllers\ActionControlle
 //////////////Dispositif///////////
 
 Route::get('dispositifs', [DispositifController::class, 'index']); // Récupérer tous les dispositifs
-Route::post('dispositifs', [DispositifController::class, 'store']); // Créer un dispositif
+Route::post('dispositifs', [DispositifController::class, 'store']); //  Créer un dispositif
 Route::get('dispositifs/{id}', [DispositifController::class, 'show']); // Récupérer un dispositif
 Route::put('dispositifs/{id}', [DispositifController::class, 'update']); // Mettre à jour un dispositif
 Route::delete('dispositifs/{id}', [DispositifController::class, 'destroy']); // Supprimer un dispositif

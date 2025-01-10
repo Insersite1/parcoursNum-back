@@ -1,11 +1,19 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\ActionUser;
-use App\Models\Dispositif;
-use App\Models\Role;
+use Illuminate\Http\JsonResponse;
+
 use Illuminate\Http\Request;
+use App\Models\ActionUser;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\Dispositif;
+
+
+
+
+
+
 use App\Models\Action;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -131,9 +139,9 @@ class TableauBordController extends Controller
         $roleJeune = Role::where('name', 'Jeune')->first();
 
         // Vérifier si le rôle "jeune" existe
-        if (!$roleJeune) {
+        /*if (!$roleJeune) {
             return response()->json(['error' => 'Rôle "jeune" non trouvé.'], 404);
-        }
+        }*/
 
         // Récupérer les dispositifs avec le nombre de "jeunes" associés
         $dispositifs = Dispositif::with(['structures.users' => function ($query) use ($roleJeune) {
