@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Referant extends Model
 {
     use HasFactory;
+
+
+    public function structure()
+{
+    return $this->belongsTo(Structure::class);
+}
+
 }

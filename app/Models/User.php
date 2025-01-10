@@ -44,9 +44,9 @@ class User extends Authenticatable
     ];
 
     public function structure()
-    {
-        return $this->hasMany(User::class, 'structure_id');
-    }
+{
+    return $this->belongsTo(Structure::class, 'structure_id');
+}
 
     /**
      * Relation avec le modèle Action
@@ -64,6 +64,7 @@ class User extends Authenticatable
         return $this->hasMany(Action::class,'session_id');
     }
 
+    
     
     /**
      * The attributes that should be hidden for serialization.

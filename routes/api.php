@@ -84,7 +84,8 @@ Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'
 
 //Référent
 
-Route::resource('referants', controller: \App\Http\Controllers\ReferantController::class);
+Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
 
 //Dashboard
 

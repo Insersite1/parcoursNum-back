@@ -14,14 +14,17 @@ class ReferantController extends Controller
      */
     public function index()
     {
-        // Récupère tous les utilisateurs avec role_id = 4 (référants)
-        $referants = User::where('role_id', 4)->get();
-
+        // Récupère les utilisateurs avec role_id = 4 et leur structure associée
+        $referants = User::where('role_id', 4)
+                         ->with('structure') // Charge la relation
+                         ->get();
+    
         return response()->json([
             'success' => true,
             'data' => $referants,
         ]);
     }
+    
 
     /**
      * Création d'un nouveau référant.
@@ -98,39 +101,9 @@ class ReferantController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $referant = User::where('role_id', 4)->findOrFail($id);
-
-        // Validation des données
-        $validated = $request->validate([
-            'avatar' => 'nullable|image|max:2048',
-            'nom' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,' . $referant->id,
-            'numTelephone' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8',
-            'statut' => 'nullable|in:Active,Inactive',
-            'sexe' => 'nullable|in:M,F',
-            'adresse' => 'nullable|string|max:255',
-            'structure_id' => 'nullable|exists:structures,id',
-        ]);
-
-        // Gestion de l'avatar (si fourni)
-        if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $referant->avatar = $avatarPath;
-        }
-
-        // Mise à jour des autres champs
-        $referant->fill(array_filter($validated)); // Mise à jour des champs non nuls
-        if (isset($validated['password'])) {
-            $referant->password = Hash::make($validated['password']); // Hachage du mot de passe
-        }
-        $referant->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Référant mis à jour avec succès.',
-            'data' => $referant,
-        ]);
+        $referant = Referant::findOrFail($id);
+        $referant->update($request->all()); // Met à jour le référant avec les données de la requête
+        return response()->json($referant);
     }
 
     /**
