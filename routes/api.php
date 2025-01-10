@@ -93,4 +93,6 @@ Route::apiResource('referants', controller: \App\Http\Controllers\ReferantContro
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
+
 Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);

@@ -10,4 +10,9 @@ class Dispositif extends Model
     use HasFactory;
     protected $fillable = ['couverture', 'name', 'DateDebut', 'statut', 'DateFin','pays'];
 
+    // Relation avec le modèle Structure
+    public function structures()
+    {
+        return $this->belongsToMany(Structure::class, 'structure_dispositifs');
+    }
 }

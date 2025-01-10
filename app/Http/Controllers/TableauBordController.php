@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
@@ -195,6 +193,36 @@ class TableauBordController extends Controller
     
         // Retourner le tableau
         return response()->json($result);
+    }
+
+    public function nombreJeunesParDispositif(): JsonResponse
+    {
+        // Récupérer le rôle "jeune"
+        $roleJeune = Role::where('name', 'jeune')->first();
+
+        // Vérifier si le rôle "jeune" existe
+        if (!$roleJeune) {
+            return response()->json(['error' => 'Rôle "jeune" non trouvé.'], 404);
+        }
+
+        // Récupérer les dispositifs avec le nombre de "jeunes" associés
+        $dispositifs = Dispositif::with(['structures.users' => function ($query) use ($roleJeune) {
+            $query->where('role_id', $roleJeune->id);
+        }])->get();
+
+        // Préparer les résultats
+        $resultats = $dispositifs->map(function ($dispositif) {
+            $nombreJeunes = $dispositif->structures->sum(function ($structure) {
+                return $structure->users->count();
+            });
+
+            return [
+                'dispositif' => $dispositif->name,
+                'nombre_jeunes' => $nombreJeunes,
+            ];
+        });
+
+        return response()->json($resultats);
     }
     
 }
