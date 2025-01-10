@@ -109,16 +109,18 @@ Route::apiResource('referants', controller: \App\Http\Controllers\ReferantContro
 /*Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);*/
 
 
+//Dashbor
+Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);
 
-
-//Dashbord
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
-Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
 
-Route::post('/login',[\App\Http\Controllers\AuthController::class,'login']);
-Route::post('/register',[\App\Http\Controllers\AuthController::class,'register']);
 
 Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
 Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+
+
+Route::post('/login',[\App\Http\Controllers\AuthController::class,'login']);
+Route::post('/register',[\App\Http\Controllers\AuthController::class,'register']);
+
