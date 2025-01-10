@@ -71,8 +71,8 @@ class ActionController extends Controller
             'DateFin' => 'required|date|after_or_equal:DateDebut',
             'description' => 'required|string',
             'couleur' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'structure_dispositif_id' => 'required|exists:structure_dispositifs,id',
+            'user_id' => 'exists:users,id',
+            'structure_dispositif_id' => 'exists:structure_dispositifs,id',
         ]);
 
         // Création de l'instance d'Action
