@@ -124,7 +124,6 @@ class TableauBordController extends Controller
 
 
 
-
     public function nombreJeunesParDispositif(): JsonResponse
     {
         // Récupérer le rôle "jeune"
@@ -154,7 +153,6 @@ class TableauBordController extends Controller
 
         return response()->json($resultats);
     }
-
 
     public function getYoungUserStatistics()
     {
