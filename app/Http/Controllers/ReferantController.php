@@ -34,26 +34,26 @@ class ReferantController extends Controller
         try {
             // Validation des données
             $validated = $request->validate([
-                'avatar' => 'required|string|max:255', // Avatar est optionnel
-                'nom' => 'required|string|max:255',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif', // Avatar est optionnel
+                'nom' => 'nullable|string|max:255',
                 'prenom' => 'nullable|string|max:255',
                 'email' => 'required|email|unique:users,email',
-                'numTelephone' => 'required|string|max:20',
-                'password' => 'required|string|min:8', // Le mot de passe est requis avec une longueur minimale
+                'numTelephone' => 'nullable||string|max:20',
+                'password' => 'nullable||string', // Le mot de passe est requis avec une longueur minimale
                 'sexe' => 'nullable|in:M,F',
                 'adresse' => 'nullable|string|max:255',
-                'structure_id' => 'required|exists:structures,id',
+                'structure_id' => 'nullable||exists:structures,id',
             ]);
         
             // Gestion de l'avatar
             $avatarPath = null;
-            if ($request->hasFile('avatar')) {
-                $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            }
+    if ($request->hasFile('avatar')) {
+        $avatarPath = $request->file('avatar')->store('avatars', 'public'); // Enregistre dans storage/app/public/avatars
+    }
         
             // Création du référant
             $referant = User::create([
-                'avatar' =>  "photo", // Avatar par défaut si pas fourni
+                'avatar' => $validated['avatar'], // Avatar par défaut si pas fourni
                 'nom' => $validated['nom'],
                 'Prenom' => $validated['prenom'] ?? null,
                 'email' => $validated['email'],
