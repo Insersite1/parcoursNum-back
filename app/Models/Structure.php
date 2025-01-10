@@ -10,14 +10,21 @@ class Structure extends Model
     use HasFactory;
     protected $fillable = ['couverture', 'nomcomplet', 'dateExpire', 'statut'];
 
-    public function user()
+    public function users()
     {
-        return $this->hasMany(User::class,'user_id');
+        return $this->hasMany(User::class, 'structure_id');
+    }
+    
+    
+
+    public function referant()
+    {
+        return $this->hasMany(referant::class,'user_id');
     }
 
-    public function dispositifs()
+    public function structureDispositif()
     {
-        return $this->belongsToMany(Dispositif::class, 'structure_dispositif');
+        return $this->hasMany(StructureDispositif::class,'structureDispositif_id');
     }
 
 }

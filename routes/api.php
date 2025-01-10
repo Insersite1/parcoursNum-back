@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DispositifController;
 use App\Http\Controllers\JeuneController;
 use App\Http\Controllers\StructureController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ManagerController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -74,8 +76,7 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 
 //Manager
 
-Route::apiResource('/Manager', ManagerController::class);
-
+Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
 
 //Jeune
 
@@ -86,10 +87,19 @@ Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
 
 
 //Référent
-Route::resource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
+Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
 
 //Dashboard
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+
+Route::post('/login',[\App\Http\Controllers\AuthController::class,'login']);
+Route::post('/register',[\App\Http\Controllers\AuthController::class,'register']);
+
+Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
+
+Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
