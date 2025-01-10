@@ -40,7 +40,7 @@ class Action extends Model
     }
 
      // Relation avec la table actionuser
-    public function actionUsers()
+    public function actionUser()
     {
         return $this->hasMany(ActionUser::class, 'action_id');
     }

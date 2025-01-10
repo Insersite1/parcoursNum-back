@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ActionUser extends Model
 {
     use HasFactory;
+    protected $table = 'action_user';
     protected $fillable = ['action_id', 'user_id'];
     public function action()
     {

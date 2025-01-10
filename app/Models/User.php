@@ -52,9 +52,13 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relation avec le modèle Action
      */
-    public function actions()
+   /* public function actions()
     {
-        return $this->hasMany(Action::class, 'user_id');
+        return $this->hasMany(Action::class, 'action_id');
+    }*/
+    public function actionUser()
+    {
+        return $this->hasMany(ActionUser::class, 'user_id');
     }
     public function role()
     {
