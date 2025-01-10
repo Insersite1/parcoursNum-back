@@ -18,12 +18,20 @@ class ManagerController extends Controller
     public function index()
     {
         try {
-            $users = User::with('role', 'structure')->get();
+
+            $users = User::with('role', 'structure')
+                ->where('role_id', 3)
+                ->get();
+
             return response()->json($users);
         } catch (Exception $e) {
-            return response()->json($e->getMessage());
 
+            return response()->json([
+                'message' => 'Une erreur s\'est produite',
+                'error' => $e->getMessage(),
+            ], 500);
         }
+
     }
 
     /**
