@@ -39,5 +39,9 @@ class Action extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-
+     // Relation avec la table actionuser
+    public function actionUsers()
+    {
+        return $this->hasMany(ActionUser::class, 'action_id');
+    }
 }
