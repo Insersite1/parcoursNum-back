@@ -1,8 +1,15 @@
 <?php
 namespace App\Http\Controllers;
+use Illuminate\Http\JsonResponse;
+
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\Dispositif;
+
+
+
 
 class TableauBordController extends Controller
 {
@@ -180,9 +187,9 @@ class TableauBordController extends Controller
         $roleJeune = Role::where('name', 'jeune')->first();
 
         // Vérifier si le rôle "jeune" existe
-        if (!$roleJeune) {
+        /*if (!$roleJeune) {
             return response()->json(['error' => 'Rôle "jeune" non trouvé.'], 404);
-        }
+        }*/
 
         // Récupérer les dispositifs avec le nombre de "jeunes" associés
         $dispositifs = Dispositif::with(['structures.users' => function ($query) use ($roleJeune) {
