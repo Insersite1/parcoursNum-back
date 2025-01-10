@@ -11,6 +11,7 @@
     </a>
 </p> --}}
 
+
 <p style="text-align: center;">
     <a href="http://localhost:4200/authentication/login?token={{ $user->confirmation_token }}"
        style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
