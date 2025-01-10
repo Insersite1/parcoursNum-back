@@ -90,13 +90,17 @@ class AuthController extends Controller
 //                'statut' => false
             ], 500);
         }
+        // Charger le rôle associé à l'utilisateur
+        $roleName = $user->role->name;
+
+
         // Retourner la réponse avec le token et les informations de l'utilisateur
         return response()->json([
             'message' => 'Connexion réussie.',
             'statut' => 0,
             'token' => $token,
             'user' => $user,
-            'role' => $user->role_id,
+            'role' => $roleName,
         ], 200);
     }
 

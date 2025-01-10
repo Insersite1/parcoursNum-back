@@ -44,4 +44,9 @@ class Action extends Model
     {
         return $this->hasMany(ActionUser::class, 'action_id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'action_user', 'action_id', 'user_id');
+    }
 }

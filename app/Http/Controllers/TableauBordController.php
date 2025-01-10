@@ -97,6 +97,85 @@ class TableauBordController extends Controller
         return response()->json($counts);
     }
 
+
+    public function getYouthStatistics()
+    {
+        $currentDate = Carbon::now();
+
+        $statistics = [
+            'M' => [
+                'under_14' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) < 14', [$currentDate])
+                    ->count(),
+                '15_19' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 15 AND 19', [$currentDate])
+                    ->count(),
+                '20_24' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 20 AND 24', [$currentDate])
+                    ->count(),
+                '25_29' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 25 AND 29', [$currentDate])
+                    ->count(),
+                '30_34' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 30 AND 34', [$currentDate])
+                    ->count(),
+                '35_39' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 35 AND 39', [$currentDate])
+                    ->count(),
+                '40_44' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 40 AND 44', [$currentDate])
+                    ->count(),
+                'over_45' => User::where('sexe', 'M')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) > 45', [$currentDate])
+                    ->count(),
+            ],
+            'F' => [
+                'under_14' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) < 14', [$currentDate])
+                    ->count(),
+                '15_19' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 15 AND 19', [$currentDate])
+                    ->count(),
+                '20_24' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 20 AND 24', [$currentDate])
+                    ->count(),
+                '25_29' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 25 AND 29', [$currentDate])
+                    ->count(),
+                '30_34' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 30 AND 34', [$currentDate])
+                    ->count(),
+                '35_39' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 35 AND 39', [$currentDate])
+                    ->count(),
+                '40_44' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 40 AND 44', [$currentDate])
+                    ->count(),
+                'over_45' => User::where('sexe', 'F')
+                    ->where('role', 'jeune')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) > 45', [$currentDate])
+                    ->count(),
+            ]
+        ];
+
+        return response()->json($statistics);
+    }
+
     public function getUsersByRegion()
     {
         // Utilisation correcte de DB pour effectuer la requête

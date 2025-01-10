@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Referant;
 
 class ReferantController extends Controller
 {
@@ -18,13 +19,13 @@ class ReferantController extends Controller
         $referants = User::where('role_id', 4)
                          ->with('structure') // Charge la relation
                          ->get();
-    
+
         return response()->json([
             'success' => true,
             'data' => $referants,
         ]);
     }
-    
+
 
     /**
      * Création d'un nouveau référant.
@@ -68,14 +69,14 @@ class ReferantController extends Controller
                 'role_id' => 4,
                 'structure_id' => $validated['structure_id'],
             ]);
-        
+
             // Réponse
             return response()->json([
                 'success' => true,
                 'message' => 'Référant créé avec succès.',
                 'data' => $referant->makeHidden(['password', 'remember_token']), // Masquer le mot de passe
             ], 201);
-        
+
         } catch (\Exception $e) {
             // Gestion des erreurs générales
             return response()->json([
@@ -85,7 +86,7 @@ class ReferantController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Affiche un référant spécifique.
      */
