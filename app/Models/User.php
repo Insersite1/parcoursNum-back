@@ -54,7 +54,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function actions()
     {
-        return $this->hasMany(Action::class, 'user_id');
+        return $this->belongsToMany(Action::class, 'action_user', 'user_id', 'action_id');
     }
     public function role()
     {
@@ -64,6 +64,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Action::class,'session_id');
     }
+
+    
 
 
 
