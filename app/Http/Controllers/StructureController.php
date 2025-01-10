@@ -35,7 +35,7 @@ class StructureController extends Controller
             'nomcomplet' => $request->nomcomplet,
             'dateExpire' => $request->dateExpire,
             'statut' => $request->statut,
-            'couverture' => $request->couverture,
+            'couverture' => 'photo',
         ]);
         return response()->json($structure, 201);
     }

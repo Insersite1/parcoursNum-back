@@ -34,26 +34,29 @@ class ReferantController extends Controller
         try {
             // Validation des données
             $validated = $request->validate([
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif', // Avatar est optionnel
+                'avatar' =>'nullable|string',                 // 'nullable|mimes:jpeg,png,jpg,gif',
                 'nom' => 'nullable|string|max:255',
                 'prenom' => 'nullable|string|max:255',
                 'email' => 'required|email|unique:users,email',
-                'numTelephone' => 'nullable||string|max:20',
-                'password' => 'nullable||string', // Le mot de passe est requis avec une longueur minimale
+                'numTelephone' => 'nullable|string|max:20',
+                'password' => 'nullable|string', // Le mot de passe est requis avec une longueur minimale
                 'sexe' => 'nullable|in:M,F',
                 'adresse' => 'nullable|string|max:255',
-                'structure_id' => 'nullable||exists:structures,id',
+                'structure_id' => 'nullable|exists:structures,id',
             ]);
-        
+            
+
+            $referant=new User();
             // Gestion de l'avatar
-            $avatarPath = null;
-    if ($request->hasFile('avatar')) {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public'); // Enregistre dans storage/app/public/avatars
-    }
-        
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+                $avatarName = time() . '.' . $avatar->extension();
+                $avatar->move(public_path('images'), $avatarName);
+                 $referant->avatar = $avatarName;
+            }
             // Création du référant
             $referant = User::create([
-                'avatar' => $validated['avatar'], // Avatar par défaut si pas fourni
+                'avatar' =>'photo', // Avtar par défaut si pas fourni
                 'nom' => $validated['nom'],
                 'Prenom' => $validated['prenom'] ?? null,
                 'email' => $validated['email'],

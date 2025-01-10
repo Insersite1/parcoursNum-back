@@ -69,8 +69,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Action::class,'session_id');
     }
 
+    public function getAvatarUrlAttribute()
+{
+    return $this->avatar ? asset('storage/' . $this->avatar) : null;
+}
 
-
+    
     /**
      * The attributes that should be hidden for serialization.
      *
