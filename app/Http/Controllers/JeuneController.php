@@ -7,6 +7,7 @@ use App\Models\Jeune;
 use App\Http\Requests\StoreJeuneRequest;
 use App\Http\Requests\UpdateJeuneRequest;
 use App\Models\User;
+use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -137,32 +138,139 @@ class JeuneController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Jeune $jeune)
+    public function show($id)
     {
-        //
+        try {
+
+            $user = User::with('role', 'structure')->findOrFail($id);
+
+
+            return response()->json([
+                'message' => 'Utilisateur trouvé avec succès.',
+                'user' => $user
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'message' => 'Utilisateur non trouvé.'
+            ], 404);
+        } catch (Exception $e) {
+
+            return response()->json([
+                'message' => 'Une erreur est survenue.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Jeune $jeune)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateJeuneRequest $request, Jeune $jeune)
-    {
-        //
+    public function update(Request $request, $id)
+{
+    try {
+        // Validation des données
+        $validatedData = $request->validate([
+            'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
+            'nom' => 'nullable|string',
+            'Prenom' => 'nullable|string',
+            'email' => 'required|string|email|unique:users,email,' . $id,
+            'numTelephone' => 'required|string',
+            'dateNaissance' => 'nullable|date',
+            'role_id' => 'exists:roles,id',
+            'sexe' => 'required|string',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Mettre à jour l'avatar si présent
+        if ($request->hasFile('avatar')) {
+            // Supprimer l'avatar existant (si nécessaire)
+            if ($user->avatar) {
+                unlink(public_path('images') . '/' . $user->avatar);
+            }
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '.' . $avatar->extension();
+            $avatar->move(public_path('images'), $avatarName);
+            $user->avatar = $avatarName;
+        }
+
+        $user->nom = $validatedData['nom'] ?? $user->nom;
+        $user->Prenom = $validatedData['Prenom'] ?? $user->Prenom;
+        $user->email = $validatedData['email'];
+        $user->numTelephone = $validatedData['numTelephone'];
+        $user->dateNaissance = $validatedData['dateNaissance'] ?? $user->dateNaissance;
+        $user->role_id = $validatedData['role_id'] ?? $user->role_id;
+        $user->sexe = $validatedData['sexe'];
+        $user->save();
+
+
+        return response()->json(['message' => 'Utilisateur mis à jour avec succès.', 'user' => $user]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+    } catch (Exception $e) {
+
+        return response()->json(['message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.', 'error' => $e->getMessage()], 500);
     }
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Jeune $jeune)
-    {
-        //
+    public function destroy($id)
+{
+    try {
+
+        $user = User::findOrFail($id);
+
+        if ($user->avatar) {
+            unlink(public_path('images') . '/' . $user->avatar);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'Utilisateur supprimé avec succès.']);
+    } catch (Exception $e) {
+
+        return response()->json(['message' => 'Une erreur est survenue lors de la suppression de l\'utilisateur.', 'error' => $e->getMessage()], 500);
     }
+}
+
+        //récupérer le rôle d'un utilisateur
+
+        public function getRoleByUserId($roleId)
+        {
+            try {
+
+                $role = Role::findOrFail($roleId);
+
+                $roleName = $role->name;
+                return response()->json([
+                    'message' => 'Rôle trouvé avec succès.',
+                    'role' => $roleName
+                ], 200);
+
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'message' => 'Utilisateur non trouvé.'
+                ], 404);
+            } catch (Exception $e) {
+                return response()->json([
+                    'message' => 'Une erreur est survenue.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+
+
 }

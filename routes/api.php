@@ -82,6 +82,8 @@ Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerControlle
 Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
 
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
+Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
+
 
 //Référent
 
