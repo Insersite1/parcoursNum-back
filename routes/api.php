@@ -11,7 +11,6 @@ use App\Http\Controllers\ManagerController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
-use App\Http\Controllers\SceanceController;
 
 /*
 |--------------------------------------------------------------------------
