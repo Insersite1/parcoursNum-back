@@ -51,9 +51,13 @@ class User extends Authenticatable
     /**
      * Relation avec le modèle Action
      */
-    public function actions()
+   /* public function actions()
     {
-        return $this->hasMany(Action::class, 'user_id');
+        return $this->hasMany(Action::class, 'action_id');
+    }*/
+    public function actionUser()
+    {
+        return $this->hasMany(ActionUser::class, 'user_id');
     }
     public function role()
     {
@@ -64,8 +68,8 @@ class User extends Authenticatable
         return $this->hasMany(Action::class,'session_id');
     }
 
-    
-    
+
+
     /**
      * The attributes that should be hidden for serialization.
      *

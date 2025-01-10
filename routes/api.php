@@ -84,15 +84,17 @@ Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::c
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 
 //Référent
-
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
 
 
 //Dashboard
+/*Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);*/
 
+
+
+
+//Dashbord
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
-Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
-Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
 Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
-
 Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
+Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);

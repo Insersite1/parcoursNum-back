@@ -17,7 +17,7 @@ class ManagerSeeder extends Seeder
             [
                 'nom' => 'Doe3',
                 'Prenom' => 'John3',
-                'email' => 'manager@example.com',
+                'email' => 'manager66@example.com',
                 'password' => Hash::make('manager123'),
                 'statut' => 'Active',
                 'numTelephone' => '123456789',
@@ -29,7 +29,7 @@ class ManagerSeeder extends Seeder
             [
                 'nom' => 'Smith',
                 'Prenom' => 'Jane',
-                'email' => 'manager2@example.com',
+                'email' => 'manager02@example.com',
                 'password' => Hash::make('manager456'),
                 'statut' => 'Active',
                 'numTelephone' => '987654321',

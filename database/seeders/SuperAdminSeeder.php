@@ -18,7 +18,7 @@ class SuperAdminSeeder extends Seeder
         User::create([
             'avatar' => null,
             'nom' => 'SuperAdmine',
-            'email' => 'superadmin@example.com',
+            'email' => 'supera44dmin@example.com',
             'numTelephone' => '123456789',
             'password' => Hash::make('superadmin123'),
             'role_id' => 1,
