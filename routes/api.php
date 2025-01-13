@@ -78,6 +78,7 @@ Route::post('structures', [StructureController::class, 'store']);
 Route::get('structures/{id}', [StructureController::class, 'show']);
 Route::put('structures/{id}', [StructureController::class, 'update']);
 Route::delete('structures/{id}', [StructureController::class, 'destroy']);
+Route::patch('/structures/{id}/change-status', [StructureController::class, 'changeStatus']);
 
 
 /////Structure Dispositif ////////////////

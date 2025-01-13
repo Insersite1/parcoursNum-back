@@ -18,7 +18,7 @@ class StructureController extends Controller
     }
 
     // Créer une nouvelle structure
-    public function store(Request $request)
+  /*  public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nomcomplet' => 'required|string|max:255',
@@ -38,7 +38,32 @@ class StructureController extends Controller
             'couverture' => 'photo',
         ]);
         return response()->json($structure, 201);
+    }*/
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nomcomplet' => 'required|string|max:255',
+            'dateExpire' => 'required|date',
+            'statut' => 'required|in:Active,Inactive',
+            'couverture' => 'nullable|image|max:2048', // Assurez-vous que 'couverture' est un fichier image valide
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->only(['nomcomplet', 'dateExpire', 'statut']);
+
+        // Gestion de la couverture (image)
+        if ($request->hasFile('couverture')) {
+            $data['couverture'] = $request->file('couverture')->store('couvertures', 'public');
+        }
+
+        $structure = Structure::create($data);
+
+        return response()->json($structure, 201);
     }
+
 
     // Récupérer une structure par son ID
     public function show($id)
@@ -121,5 +146,87 @@ class StructureController extends Controller
         ], 200);
     }
 
+    public function update(Request $request, Structure $structure)
+    {
+        $validator = Validator::make($request->all(), [
+            'nomcomplet' => 'sometimes|required|string|max:255',
+            'dateExpire' => 'sometimes|required|date',
+            'statut' => 'sometimes|required|in:Active,Inactive',
+            'couverture' => 'nullable|image|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->only(['nomcomplet', 'dateExpire', 'statut']);
+
+        // Gestion de la couverture
+        if ($request->hasFile('couverture')) {
+            // Supprimer l'ancienne couverture si elle existe
+            if ($structure->couverture) {
+                Storage::disk('public')->delete($structure->couverture);
+            }
+            $data['couverture'] = $request->file('couverture')->store('couvertures', 'public');
+        }
+
+        $structure->update($data);
+
+        return response()->json($structure);
+    }
+    //Supprimer Dispositif
+    public function destroy(Structure $structure)
+    {
+        // Supprimer la couverture si elle existe
+        if ($structure->couverture) {
+            Storage::disk('public')->delete($structure->couverture);
+        }
+
+        $structure->delete();
+
+        return response()->json(['message' => 'Structure supprimée avec succès']);
+    }
+
+    /*Fonction de recherche*/
+    public function search($search)
+    {
+        $query = Structure::query();
+
+        $query->where('nomcomplet', 'LIKE', '%' . $search . '%')
+            ->orWhere('statut', 'LIKE', '%' . $search . '%')
+            ->orWhere(function ($dateQuery) use ($search) {
+                $dateQuery->where('dateExpire', 'LIKE', '%' . $search . '%');
+            });
+
+        $structures = $query->get();
+
+        return response()->json($structures);
+    }
+
+
+    /*Fonction qui permet de mettre a jour le statut de structure*/
+    public function changeStatus(Request $request, $id)
+    {
+        // Valider le statut fourni
+        $validated = $request->validate([
+            'statut' => 'required|in:Active,Inactive', // Assure que le statut est soit "Active" soit "Inactive"
+        ]);
+
+        // Trouver la structure par son ID
+        $structure = Structure::find($id);
+
+        if (!$structure) {
+            return response()->json(['message' => 'Structure non trouvée.'], 404);
+        }
+
+        // Mettre à jour le statut
+        $structure->statut = $validated['statut'];
+        $structure->save();
+
+        return response()->json([
+            'message' => 'Statut de la structure mis à jour avec succès.',
+            'structure' => $structure,
+        ], 200);
+    }
 
 }
