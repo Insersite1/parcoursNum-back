@@ -97,9 +97,9 @@ Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerControlle
 //Jeune
 
 Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
-
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
+Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 
 
 //Référent

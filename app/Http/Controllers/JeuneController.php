@@ -176,7 +176,7 @@ class JeuneController extends Controller
     public function update(Request $request, $id)
 {
     try {
-        
+
         $validatedData = $request->validate([
             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
             'nom' => 'nullable|string',
@@ -272,5 +272,88 @@ class JeuneController extends Controller
             }
         }
 
+
+    /*
+    Description modification du jeune complet
+    */
+    public function updateJeuneComplet(Request $request, $id)
+    {
+        try {
+            // Validation des données
+            $validatedData = $request->validate([
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'nom' => 'nullable|string|max:255',
+                'Prenom' => 'nullable|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+                'numTelephone' => 'required|string|max:15',
+                'dateNaissance' => 'nullable|date',
+                'statut' => 'nullable|in:Active,Inactive',
+                'situation' => 'nullable|string',
+                'sexe' => 'required|in:M,F',
+                'etatCivil' => 'nullable|string',
+                'situationTravail' => 'nullable|string',
+                'QP' => 'nullable|boolean',
+                'ZRR' => 'nullable|boolean',
+                'ETH' => 'nullable|boolean',
+                'EPC' => 'nullable|boolean',
+                'API' => 'nullable|boolean',
+                'AE' => 'nullable|boolean',
+                'Adresse' => 'nullable|string|max:255',
+                'bibiographie' => 'nullable|string',
+                'codePostal' => 'nullable|string|max:10',
+                'region' => 'nullable|string|max:255',
+                'ville' => 'nullable|string|max:255',
+                'NumSecuriteSocial' => 'nullable|string|max:20',
+                'role_id' => 'nullable|exists:roles,id',
+                'structure_id' => 'nullable|exists:structures,id',
+            ]);
+
+            // Récupération de l'utilisateur
+            $user = User::findOrFail($id);
+
+            // Gestion de l'avatar
+            if ($request->hasFile('avatar')) {
+                // Suppression de l'ancien avatar s'il existe
+                if ($user->avatar && file_exists(public_path('images/' . $user->avatar))) {
+                    unlink(public_path('images/' . $user->avatar));
+                }
+                // Téléchargement du nouvel avatar
+                $avatar = $request->file('avatar');
+                $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
+                $avatar->move(public_path('images'), $avatarName);
+
+                $user->avatar = $avatarName;
+            }
+            // Mise à jour de tous les champs
+            foreach ($validatedData as $key => $value) {
+                if ($value !== null) {
+                    // Conversion des valeurs boolean
+                    if (in_array($key, ['QP', 'ZRR', 'ETH', 'EPC', 'API', 'AE'])) {
+                        $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                    }
+                    $user->$key = $value;
+                }
+            }
+
+            // Sauvegarde des modifications
+            $user->save();
+
+            return response()->json([
+                'message' => 'Utilisateur mis à jour avec succès.',
+                'user' => $user
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 }

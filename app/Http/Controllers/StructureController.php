@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dispositif;
+use App\Models\Session;
 use App\Models\Structure;
 use App\Models\StructureDispositif;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class StructureController extends Controller
 {
-    // Récupérer toutes les structures
+  /*
+  Description: Récupérer toutes les structures
+  */
     public function index()
     {
         $structures = Structure::all();
@@ -175,17 +179,19 @@ class StructureController extends Controller
         return response()->json($structure);
     }
     //Supprimer Dispositif
-    public function destroy(Structure $structure)
+    public function destroy($id)
     {
-        // Supprimer la couverture si elle existe
-        if ($structure->couverture) {
-            Storage::disk('public')->delete($structure->couverture);
+        $structure = Structure::find($id);
+
+        if (!$structure) {
+            return response()->json(['message' => 'Dispositif non trouvé'], 404);
         }
 
         $structure->delete();
 
-        return response()->json(['message' => 'Structure supprimée avec succès']);
+        return response()->json(['message' => 'Dispositif supprimé avec succès'], 200);
     }
+
 
     /*Fonction de recherche*/
     public function search($search)
@@ -202,7 +208,6 @@ class StructureController extends Controller
 
         return response()->json($structures);
     }
-
 
     /*Fonction qui permet de mettre a jour le statut de structure*/
     public function changeStatus(Request $request, $id)
