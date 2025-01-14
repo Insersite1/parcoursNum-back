@@ -35,4 +35,11 @@ Route::apiResource('/Structure',controller: \App\Http\Controllers\StructureContr
 Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
 
+// Route::put('/updatereferants/{id}',[\App\Http\Controllers\ReferantController::class,'updatereferants'])->name('updateAgent');
+
+
+Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
+
+
+
 
