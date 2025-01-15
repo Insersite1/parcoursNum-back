@@ -176,7 +176,7 @@ class JeuneController extends Controller
     }
 
 
-    
+
     public function update(Request $request, $id)
 {
     try {
@@ -307,8 +307,6 @@ public function updatePassword(Request $request)
 
     return response()->json(['message' => 'Mot de passe mis à jour avec succès.']);
 }
-
-
 
 
 

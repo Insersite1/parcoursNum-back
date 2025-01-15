@@ -65,6 +65,7 @@ class ActionController extends Controller
          try {
              // Validation des données
              $validatedData = $request->validate([
+                'couverture' => 'mimes:jpeg,png,jpg,gif',
                  'nom' => 'required|string',
                  'place' => 'required|string',
                  'type' => 'required|string',
@@ -77,6 +78,7 @@ class ActionController extends Controller
                  'structure_id' => 'required|exists:structures,id',
                  'dispositif_id' => 'required|exists:dispositifs,id',
                  'auteur' => 'required|string',
+                 'statut' => 'in:Active,Inactive',
              ]);
 
              // Validation ou création de l'association structure_dispositif
@@ -96,6 +98,13 @@ class ActionController extends Controller
 
              // Créez l'action
              $action = new Action();
+
+             if ($request->hasFile('couverture')) {
+                $couverture = $request->file('avatar');
+                $couvertureName = time() . '.' . $couverture->extension();
+                $couverture->move(public_path('images'), $couvertureName);
+                $action->couverture = $couvertureName;
+            }
              $action->nom = $validatedData['nom'];
              $action->place = $validatedData['place'];
              $action->type = $validatedData['type'];
@@ -105,6 +114,7 @@ class ActionController extends Controller
              $action->couleur = $validatedData['couleur'];
              $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
              $action->auteur = $validatedData['auteur'];
+             $action->statut = $validatedData['statut'];
              $action->user_id = $userId;
 
              // Sauvegardez l'action
@@ -189,6 +199,6 @@ class ActionController extends Controller
         return response()->json(['message' => 'Action supprimée avec succès'], 200);
     }
 
-  
+
 
 }
