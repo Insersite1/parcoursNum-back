@@ -30,9 +30,7 @@ Route::apiResource('sceances', SceanceController::class);
 
 //session
 Route::apiResource('sessions', SessionController::class);
-
 // Route de recherche de session
-//Route::get('sessions/search', [SessionController::class, 'search']);
 Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 /////Midellware//////
@@ -76,7 +74,7 @@ Route::delete('dispositifs/{id}', [DispositifController::class, 'destroy']); // 
 Route::get('structures', [StructureController::class, 'index']);
 Route::post('structures', [StructureController::class, 'store']);
 Route::get('structures/{id}', [StructureController::class, 'show']);
-Route::put('structures/{id}', [StructureController::class, 'update']);
+Route::put('/structures/{id}', [StructureController::class, 'update']);
 Route::delete('structures/{id}', [StructureController::class, 'destroy']);
 Route::patch('/structures/{id}/change-status', [StructureController::class, 'changeStatus']);
 
