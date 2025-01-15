@@ -213,27 +213,22 @@ class StructureController extends Controller
     /**
      * Description: Mettre à jour le statut d'une structure.
      * Méthode: PATCH
-     * Entrée: Nouveau statut (Active, Inactive).
+     * Entrée: id Structure
      * Sortie: Structure mise à jour avec status 200.
      */
-    public function changeStatus(Request $request, $id)
+    public function updatestructureetat($id)
     {
-        $validated = $request->validate([
-            'statut' => 'required|in:Active,Inactive',
-        ]);
-
         $structure = Structure::find($id);
-
-        if (!$structure) {
-            return response()->json(['message' => 'Structure non trouvée.'], 404);
+        if ($structure) {
+            if ($structure->statut == 'Active') {
+                $structure->statut = 'Inactive';
+            } elseif ($structure->statut == 'Inactive') {
+                $structure->statut = 'Active';
+            }
+            $structure->save();
+            return response()->json(['message' => 'État mis à jour avec succès.'], 200);
+        } else {
+            return response()->json(['error' => 'referent introuvable.'], 404);
         }
-
-        $structure->statut = $validated['statut'];
-        $structure->save();
-
-        return response()->json([
-            'message' => 'Statut de la structure mis à jour avec succès.',
-            'structure' => $structure,
-        ], 200);
     }
 }

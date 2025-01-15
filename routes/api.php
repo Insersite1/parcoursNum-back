@@ -76,8 +76,7 @@ Route::post('structures', [StructureController::class, 'store']);
 Route::get('structures/{id}', [StructureController::class, 'show']);
 Route::put('/structures/{id}', [StructureController::class, 'update']);
 Route::delete('structures/{id}', [StructureController::class, 'destroy']);
-Route::patch('/structures/{id}/change-status', [StructureController::class, 'changeStatus']);
-
+Route::put('/updatestructureetat/{id}', [StructureController::class,'updatestructureetat']);
 
 /////Structure Dispositif ////////////////
 
@@ -121,7 +120,6 @@ Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantControlle
 
 
 //Dashbor
-Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
