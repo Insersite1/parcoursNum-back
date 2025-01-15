@@ -107,8 +107,12 @@ class JeuneController extends Controller
     }
 }
 
-
-
+/**
+ * Confirme l'inscription de l'utilisateur en vérifiant le token de confirmation.
+ *
+ * @param \Illuminate\Http\Request $request Les données de la requête contenant le token.
+ * @return \Illuminate\Http\JsonResponse Réponse JSON avec un message de succès ou d'erreur.
+ */
     public function confirmInscription(Request $request)
     {
         $validatedData = $request->validate([
@@ -138,14 +142,18 @@ class JeuneController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
+/**
+ * Récupère les détails d'un utilisateur par son identifiant, y compris ses informations de rôle et de structure.
+ *
+ * @param int $id L'identifiant de l'utilisateur.
+ * @return \Illuminate\Http\JsonResponse La réponse JSON contenant l'utilisateur ou un message d'erreur.
+ */
+
     public function show($id)
     {
         try {
 
-            $user = User::with('role', 'structure')->findOrFail($id);
+            $user = User::with('role')->where('role_id', 2)->findOrFail($id);
 
 
             return response()->json([
@@ -168,14 +176,7 @@ class JeuneController extends Controller
     }
 
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-
-
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, $id)
 {
     try {
@@ -225,9 +226,12 @@ class JeuneController extends Controller
 }
 
 
-    /**
-     * Remove the specified resource from storage.
-     */
+/**
+ * Supprime un utilisateur par son ID.
+ *
+ * @param int $id L'ID de l'utilisateur à supprimer.
+ * @return \Illuminate\Http\JsonResponse Réponse JSON indiquant le succès ou l'erreur.
+ */
     public function destroy($id)
 {
     try {
@@ -247,8 +251,12 @@ class JeuneController extends Controller
     }
 }
 
-        //récupérer le rôle d'un utilisateur
-
+/**
+ * Récupère le rôle d'un utilisateur par son ID de rôle.
+ *
+ * @param int $roleId L'ID du rôle à récupérer.
+ * @return \Illuminate\Http\JsonResponse Réponse JSON avec le rôle trouvé ou une erreur.
+ */
         public function getRoleByUserId($roleId)
         {
             try {
