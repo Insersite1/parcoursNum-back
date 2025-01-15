@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Mail\JeuneCreatedMail;
-use App\Models\Jeune;
-use App\Http\Requests\StoreJeuneRequest;
-use App\Http\Requests\UpdateJeuneRequest;
 use App\Models\User;
 use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class JeuneController extends Controller
 {
@@ -132,9 +131,6 @@ class JeuneController extends Controller
     }
 
 
-
-
-
     /**
      * Display the specified resource.
      */
@@ -176,7 +172,7 @@ class JeuneController extends Controller
     public function update(Request $request, $id)
 {
     try {
-        
+
         $validatedData = $request->validate([
             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
             'nom' => 'nullable|string',
@@ -270,7 +266,135 @@ class JeuneController extends Controller
                     'error' => $e->getMessage()
                 ], 500);
             }
-        }
+    }
+
+      /**
+ * Modifier le mot de passe d'un jeune avec JWT.
+ */
+public function updatePassword(Request $request)
+{
+    // Validation des données
+    $request->validate([
+        'current_password' => 'required|string',
+        'new_password' => 'required|string|min:8|confirmed',
+    ]);
+
+    $user = auth()->user();
+    $user = User::find($user->id);
+
+
+    // Vérification du mot de passe actuel
+    if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json(['message' => 'Le mot de passe actuel est incorrect.'], 400);
+    }
+
+    // Mise à jour du mot de passe
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json(['message' => 'Mot de passe mis à jour avec succès.']);
+}
+
+
+
+
+
+/**
+ * Description: Complète le profil d'un utilisateur connecté en mettant à jour les informations manquantes.
+ * Méthode: POST
+ * Entrée:
+ *  - dateNaissance (date, optionnelle)
+ *  - Adresse (string, optionnelle)
+ *  - ville (string, optionnelle)
+ *  - codePostal (string, optionnelle)
+ *  - region (string, optionnelle)
+ *  - bibiographie (string, optionnelle)
+ *  - situation (string, optionnelle)
+ *  - etatCivil (string, optionnelle)
+ *  - situationTravail (string, optionnelle)
+ *  - QP, ZRR, ETH, EPC, API, AE (boolean, optionnelles)
+ *  - NumSecuriteSocial (string, optionnelle)
+ * Sortie:
+ *  - Réponse JSON avec un message de succès et les données utilisateur mises à jour en cas de succès (status 200).
+ *  - Réponse JSON avec un message d'erreur en cas de validation échouée (status 422) ou erreur serveur (status 500).
+ */
+
+ public function completeProfile(Request $request)
+ {
+     try {
+         // Récupérer l'utilisateur connecté
+         $currentUser = Auth::user();
+
+         // Vérifier si l'utilisateur est bien connecté
+         if (!$currentUser) {
+             return response()->json(['message' => 'Utilisateur non authentifié.'], 401);
+         }
+
+         // Vérifier si l'utilisateur a un role_id égal à 2
+         if ($currentUser->role_id != 2) {
+             return response()->json(['message' => 'Vous n\'avez pas les droits nécessaires pour modifier ce profil.'], 403);
+         }
+
+         // Vérifier si certaines informations essentielles manquent
+         if (!$currentUser->nom || !$currentUser->Prenom || !$currentUser->email || !$currentUser->numTelephone || !$currentUser->sexe || !$currentUser->role_id) {
+             return response()->json(['message' => 'Certains champs obligatoires sont manquants.'], 400);
+         }
+
+         // Validation des données supplémentaires
+         $validatedData = $request->validate([
+             'dateNaissance' => 'nullable|date',
+             'Adresse' => 'nullable|string',
+             'ville' => 'nullable|string',
+             'codePostal' => 'nullable|string',
+             'region' => 'nullable|string',
+             'bibiographie' => 'nullable|string',
+             'situation' => 'nullable|string',
+             'etatCivil' => 'nullable|string',
+             'situationTravail' => 'nullable|string',
+             'QP' => 'nullable|boolean',
+             'ZRR' => 'nullable|boolean',
+             'ETH' => 'nullable|boolean',
+             'EPC' => 'nullable|boolean',
+             'API' => 'nullable|boolean',
+             'AE' => 'nullable|boolean',
+             'NumSecuriteSocial' => 'nullable|string',
+         ]);
+
+         // Mettre à jour les champs de l'utilisateur existant
+         $currentUser->dateNaissance = $validatedData['dateNaissance'] ?? $currentUser->dateNaissance;
+         $currentUser->Adresse = $validatedData['Adresse'] ?? $currentUser->Adresse;
+         $currentUser->ville = $validatedData['ville'] ?? $currentUser->ville;
+         $currentUser->codePostal = $validatedData['codePostal'] ?? $currentUser->codePostal;
+         $currentUser->region = $validatedData['region'] ?? $currentUser->region;
+         $currentUser->bibiographie = $validatedData['bibiographie'] ?? $currentUser->bibiographie;
+         $currentUser->situation = $validatedData['situation'] ?? $currentUser->situation;
+         $currentUser->etatCivil = $validatedData['etatCivil'] ?? $currentUser->etatCivil;
+         $currentUser->situationTravail = $validatedData['situationTravail'] ?? $currentUser->situationTravail;
+         $currentUser->QP = $validatedData['QP'] ?? $currentUser->QP;
+         $currentUser->ZRR = $validatedData['ZRR'] ?? $currentUser->ZRR;
+         $currentUser->ETH = $validatedData['ETH'] ?? $currentUser->ETH;
+         $currentUser->EPC = $validatedData['EPC'] ?? $currentUser->EPC;
+         $currentUser->API = $validatedData['API'] ?? $currentUser->API;
+         $currentUser->AE = $validatedData['AE'] ?? $currentUser->AE;
+         $currentUser->NumSecuriteSocial = $validatedData['NumSecuriteSocial'] ?? $currentUser->NumSecuriteSocial;
+
+
+         $currentUser->save();
+
+
+         return response()->json(['message' => 'Profil mis à jour avec succès.', 'user' => $currentUser], 200);
+     } catch (\Illuminate\Validation\ValidationException $e) {
+
+         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+     } catch (Exception $e) {
+         
+         return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
+     }
+ }
+
 
 
 }
+
+
+

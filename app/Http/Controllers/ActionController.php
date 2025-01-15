@@ -91,7 +91,7 @@ class ActionController extends Controller
              // Vérifiez si des utilisateurs sont associés
              $userId = null;
              if (isset($validatedData['users']) && is_array($validatedData['users'])) {
-                 $userId = $validatedData['users'][0]; // Sélectionnez le premier utilisateur pour définir user_id
+                 $userId = $validatedData['users'][0];
              }
 
              // Créez l'action
@@ -105,7 +105,7 @@ class ActionController extends Controller
              $action->couleur = $validatedData['couleur'];
              $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
              $action->auteur = $validatedData['auteur'];
-             $action->user_id = $userId; 
+             $action->user_id = $userId;
 
              // Sauvegardez l'action
              $action->save();
@@ -125,12 +125,6 @@ class ActionController extends Controller
              ], 500);
          }
      }
-
-
-
-
-
-
 
 
     /**
@@ -194,4 +188,7 @@ class ActionController extends Controller
 
         return response()->json(['message' => 'Action supprimée avec succès'], 200);
     }
+
+  
+
 }
