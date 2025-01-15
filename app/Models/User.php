@@ -94,4 +94,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * Relation avec le model Sondage: Un référent peut créer plusieurs sondages.
+     */
+    public function sondages()
+    {
+        return $this->hasMany(Sondage::class);
+    }
 }
