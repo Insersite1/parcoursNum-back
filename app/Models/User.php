@@ -65,15 +65,7 @@ public function dispositif()
     /**
      * Relation avec le modèle Action
      */
-   /* public function actions()
-    {
-        return $this->hasMany(Action::class, 'action_id');
-    }*/
- /*   public function actionUser()
-    {
-        return $this->hasMany(ActionUser::class, 'user_id');
-    }*/
-    public function actions()
+   public function actions()
     {
         return $this->hasMany(Action::class, 'user_id');
     }
@@ -93,7 +85,10 @@ public function dispositif()
     {
     return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
-
+    public function sceances()
+    {
+        return $this->hasMany(Sceance::class, 'user_id');
+    }
 
 
 
