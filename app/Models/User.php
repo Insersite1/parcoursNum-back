@@ -40,13 +40,19 @@ class User extends Authenticatable implements JWTSubject
             'AE',
             'Adresse',
             'role_id',
-            'structure_id'
-
+            'structure_id',
+            'accepter_conditions',
+            'dispositif_id',
     ];
 
     public function structure()
 {
     return $this->belongsTo(Structure::class, 'structure_id');
+}
+
+public function dispositif()
+{
+    return $this->belongsTo(Dispositif::class, 'dispositif_id');
 }
 
     /**

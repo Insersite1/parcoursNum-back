@@ -9,55 +9,55 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-        // Valider les données du formulaire
-        $data = $request->validate([
-            "Prenom" => "required",
-            "nom" => "required",
-            "Adresse" => "required",
-            "numTelephone" => "required|unique:users|min:9",
-            "sexe" => "required",
-            "email" => "required|email|unique:users",
-            "dateNaissance" => "required",
-            "password" => "required|min:6",
-            "avatar" => "nullable|image|mimes:jpeg,png,jpg,gif",
-        ]);
+    // public function register(Request $request)
+    // {
+    //     // Valider les données du formulaire
+    //     $data = $request->validate([
+    //         "Prenom" => "required",
+    //         "nom" => "required",
+    //         "Adresse" => "required",
+    //         "numTelephone" => "required|unique:users|min:9",
+    //         "sexe" => "required",
+    //         "email" => "required|email|unique:users",
+    //         "dateNaissance" => "required",
+    //         "password" => "required|min:6",
+    //         "avatar" => "nullable|image|mimes:jpeg,png,jpg,gif",
+    //     ]);
 
-        try {
-            // Traitement de l'upload de l'image
-            if ($request->hasFile('avatar')) {
-                $filename = time() . '_' . $request->file('avatar')->getClientOriginalName();
-                $path = $request->file('avatar')->storeAs('images', $filename, 'public');
-                $data['avatar'] = '/storage/' . $path;
-            }
+    //     try {
+    //         // Traitement de l'upload de l'image
+    //         if ($request->hasFile('avatar')) {
+    //             $filename = time() . '_' . $request->file('avatar')->getClientOriginalName();
+    //             $path = $request->file('avatar')->storeAs('images', $filename, 'public');
+    //             $data['avatar'] = '/images/' . $path;
+    //         }
 
-            // Hash du mot de passe avant de le stocker
-            $data['password'] = Hash::make($data['password']);
+    //         // Hash du mot de passe avant de le stocker
+    //         $data['password'] = Hash::make($data['password']);
 
-            // Définir le statut par défaut à "debloquer"
-            $data['statut'] = 'Active';
-            $data['role_id'] = 1;
+    //         // Définir le statut par défaut à "debloquer"
+    //         $data['statut'] = 'Active';
+    //         $data['role_id'] = 1;
 
-            // Création de l'utilisateur
-            $user = User::create($data);
+    //         // Création de l'utilisateur
+    //         $user = User::create($data);
 
-            // Réponse avec les données de l'utilisateur
-            return response()->json([
-                'statut' => 201,
-                'data' => $user,
-                "token" => null,
-            ], 201);
+    //         // Réponse avec les données de l'utilisateur
+    //         return response()->json([
+    //             'statut' => 201,
+    //             'data' => $user,
+    //             "token" => null,
+    //         ], 201);
 
-        } catch (\Exception $e) {
-            // En cas d'erreur, retourne un message d'erreur JSON
-            return response()->json([
-                "statut" => false,
-                "message" => "Erreur lors de l'inscription",
-                "error" => $e->getMessage()
-            ], 500);
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         // En cas d'erreur, retourne un message d'erreur JSON
+    //         return response()->json([
+    //             "statut" => false,
+    //             "message" => "Erreur lors de l'inscription",
+    //             "error" => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
 
     public function login(Request $request)

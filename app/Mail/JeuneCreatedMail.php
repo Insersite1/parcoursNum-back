@@ -40,7 +40,7 @@ class JeuneCreatedMail extends Mailable
      */
     public function build()
     {
-        return $this->from('awa96362@gmail.com', 'insertisite')
+        return $this->from('awa96362@gmail.com', 'insersite')
                     ->view('Jeune_created')
                     ->subject('Bienvenue dans notre système!')
                     ->with(['user' => $this->user]);
