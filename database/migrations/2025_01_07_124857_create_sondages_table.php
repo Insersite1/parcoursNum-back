@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('sondages', function (Blueprint $table) {
             $table->id();
+            $table->string('titre');
+            $table->text('description')->nullable(); // Champ facultatif
+            $table->timestamp('date_debut');
+            $table->timestamp('date_fin');
+            $table->boolean('est_publie')->default(false);
+            $table->boolean('pour_tous_utilisateurs')->default(false);
+            $table->enum('statut',['actif','inactif'])->default('actif');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

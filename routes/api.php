@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SceanceController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\SondageController;
+use App\Http\Controllers\ReponseController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
@@ -133,3 +135,12 @@ Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion'
 Route::post('/login',[\App\Http\Controllers\AuthController::class,'login']);
 Route::post('/register',[\App\Http\Controllers\AuthController::class,'register']);
 
+
+// Routes Sondages
+Route::apiResource('sondages', SondageController::class);
+Route::patch('/sondages/{id}/change-status', [SondageController::class, 'changeStatus']);
+
+
+// Routes Réponses
+Route::apiResource('reponses', ReponseController::class);
+Route::get('sondages/{sondage}/reponses', [ReponseController::class, 'getReponsesSondage']);
