@@ -94,9 +94,10 @@ Route::apiResource('/Manager',controller: ManagerController::class);
 //Jeune
 
 Route::apiResource('/Jeune',controller: JeuneController::class);
-
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
+Route::get('/apercu/{id}', [JeuneController::class, 'getJeuneUserStatistics']);
+
 //Modifier mot passe du jeune avec jwt
 Route::middleware('jwt.auth')->post('/jeune/update-password', [JeuneController::class, 'updatePassword']);
 Route::middleware('jwt.auth')->post('/jeune/complete-profile', [JeuneController::class, 'completeProfile']);
