@@ -108,6 +108,13 @@ Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 //Référent
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
 
+// Route::put('/updatereferants/{id}',[\App\Http\Controllers\ReferantController::class,'updatereferants'])->name('updateAgent');
+
+
+Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
+
+
+
 
 //Dashboard
 /*Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);*/
