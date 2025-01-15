@@ -34,72 +34,79 @@ class JeuneController extends Controller
 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+/**
+ * Crée un nouvel utilisateur avec les informations fournies dans la requête.
+ *
+ * Cette fonction valide les données envoyées dans la requête, traite les fichiers (avatar),
+ * crée un nouvel utilisateur, assigne les valeurs aux champs correspondants, puis sauvegarde
+ * l'utilisateur dans la base de données. Si tout se passe bien, un email de bienvenue est envoyé
+ * à l'utilisateur et une réponse de succès est retournée. En cas d'erreur, des messages d'erreur
+ * détaillés sont retournés.
+ *
+ * @param \Illuminate\Http\Request $request La requête contenant les données de l'utilisateur à créer.
+ *
+  * @return \Illuminate\Http\JsonResponse La réponse JSON avec le message de succès ou d'erreur.
+ */
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
-    {
+{
+    try {
+        // Validation des données
+        $validatedData = $request->validate([
+            'avatar' => 'mimes:jpeg,png,jpg,gif',
+            'nom' => 'nullable|string',
+            'Prenom' => 'nullable|string',
+            'email' => 'required|string|email|unique:users',
+            'numTelephone' => 'required|string',
+            'role_id' => 'exists:roles,id',
+            'sexe' => 'required|string',
+            'accept_conditions' => 'required|accepted',
+        ]);
 
-        try {
-            // Validation des données
-            $validatedData = $request->validate([
-                'avatar' => 'mimes:jpeg,png,jpg,gif',
-                'nom' => 'nullable|string',
-                'Prenom' => 'nullable|string',
-                'email' => 'required|string|email|unique:users',
-                'numTelephone' => 'required|string',
-                'dateNaissance' => 'nullable|date',
-                'role_id' => 'exists:roles,id',
-                'sexe' => 'required|string',
+        // Création de l'utilisateur
+        $user = new User();
 
-            ]);
-
-            // Création de l'utilisateur
-            $user = new User();
-
-
-            if ($request->hasFile('avatar')) {
-                $avatar = $request->file('avatar');
-                $avatarName = time() . '.' . $avatar->extension();
-                $avatar->move(public_path('images'), $avatarName);
-                $user->avatar = $avatarName;
-            }
-
-            $user->nom = $validatedData['nom'];
-            $user->Prenom = $validatedData['Prenom'];
-            $user->email = $validatedData['email'];
-            $user->numTelephone = $validatedData['numTelephone'];
-            $user->password = bcrypt('passer123');
-            $user->dateNaissance = $validatedData['dateNaissance'];
-            $user->statut = 'Active';
-            $user->role_id = 2;
-            $user->sexe = $validatedData['sexe'];
-            $user->confirmation_token = Str::random(60);
-            $user->save();
-
-            // Envoi de l'email à l'utilisateur
-            Mail::to($user->email)->send(new JeuneCreatedMail($user));
-
-
-
-            return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Retourner les erreurs de validation
-            return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-        } catch (Exception $e) {
-            // Retourner les erreurs générales
-            return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'utilisateur.', 'error' => $e->getMessage()], 500);
+        // Traitement de l'avatar
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '.' . $avatar->extension();
+            $avatar->move(public_path('images'), $avatarName);
+            $user->avatar = $avatarName;
         }
+
+        // Assignation des valeurs
+        $user->nom = $validatedData['nom'];
+        $user->Prenom = $validatedData['Prenom'];
+        $user->email = $validatedData['email'];
+        $user->numTelephone = $validatedData['numTelephone'];
+        $user->password = bcrypt('passer123');
+        $user->statut = 'Active';
+        $user->role_id = 2;
+        $user->sexe = $validatedData['sexe'];
+        $user->confirmation_token = Str::random(60);
+
+        // Sauvegarde de l'utilisateur
+        $user->save();
+
+         // Génération du token
+         $token = $user->createToken('UserToken')->plainTextToken;
+
+        // Envoi de l'email à l'utilisateur
+        Mail::to($user->email)->send(new JeuneCreatedMail($user));
+
+        // Réponse avec succès
+        return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user,'token' => $token], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+    } catch (Exception $e) {
+
+        return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'utilisateur.', 'error' => $e->getMessage()], 500);
+    }
 }
+
 
 
     public function confirmInscription(Request $request)
@@ -179,7 +186,6 @@ class JeuneController extends Controller
             'Prenom' => 'nullable|string',
             'email' => 'required|string|email|unique:users,email,' . $id,
             'numTelephone' => 'required|string',
-            'dateNaissance' => 'nullable|date',
             'role_id' => 'exists:roles,id',
             'sexe' => 'required|string',
         ]);
@@ -202,7 +208,6 @@ class JeuneController extends Controller
         $user->Prenom = $validatedData['Prenom'] ?? $user->Prenom;
         $user->email = $validatedData['email'];
         $user->numTelephone = $validatedData['numTelephone'];
-        $user->dateNaissance = $validatedData['dateNaissance'] ?? $user->dateNaissance;
         $user->role_id = $validatedData['role_id'] ?? $user->role_id;
         $user->sexe = $validatedData['sexe'];
         $user->save();
@@ -336,7 +341,7 @@ public function updatePassword(Request $request)
          }
 
          // Vérifier si certaines informations essentielles manquent
-         if (!$currentUser->nom || !$currentUser->Prenom || !$currentUser->email || !$currentUser->numTelephone || !$currentUser->sexe || !$currentUser->role_id) {
+         if (!$currentUser->nom || !$currentUser->Prenom || !$currentUser->email || !$currentUser->numTelephone || !$currentUser->sexe || !$currentUser->role_id || !$currentUser->accepter_conditions) {
              return response()->json(['message' => 'Certains champs obligatoires sont manquants.'], 400);
          }
 
@@ -387,7 +392,7 @@ public function updatePassword(Request $request)
 
          return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
      } catch (Exception $e) {
-         
+
          return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
      }
  }
