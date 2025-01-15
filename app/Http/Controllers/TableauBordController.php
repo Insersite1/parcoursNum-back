@@ -1,79 +1,23 @@
 <?php
 namespace App\Http\Controllers;
-use Illuminate\Http\JsonResponse;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\ActionUser;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Dispositif;
-
-
 use App\Models\Action;
 use Illuminate\Support\Facades\DB;
-/*use Symfony\Component\HttpFoundation\JsonResponse;*/
-
-
 
 class TableauBordController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Récupère les totaux pour chaque attribut (EPC, ETH, API, etc.) pour les utilisateurs ayant le rôle "Jeune".
+     *
+     * @return JsonResponse Résultats sous forme de JSON avec les totaux pour chaque attribut.
      */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
     public function getCounts()
     {
         // Récupérer l'ID du rôle 'Jeune'
@@ -93,88 +37,14 @@ class TableauBordController extends Controller
         return response()->json($counts);
     }
 
-
-    public function getYouthStatistics()
-    {
-        $currentDate = Carbon::now();
-
-        $statistics = [
-            'M' => [
-                'under_14' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) < 14', [$currentDate])
-                    ->count(),
-                '15_19' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 15 AND 19', [$currentDate])
-                    ->count(),
-                '20_24' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 20 AND 24', [$currentDate])
-                    ->count(),
-                '25_29' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 25 AND 29', [$currentDate])
-                    ->count(),
-                '30_34' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 30 AND 34', [$currentDate])
-                    ->count(),
-                '35_39' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 35 AND 39', [$currentDate])
-                    ->count(),
-                '40_44' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 40 AND 44', [$currentDate])
-                    ->count(),
-                'over_45' => User::where('sexe', 'M')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) > 45', [$currentDate])
-                    ->count(),
-            ],
-            'F' => [
-                'under_14' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) < 14', [$currentDate])
-                    ->count(),
-                '15_19' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 15 AND 19', [$currentDate])
-                    ->count(),
-                '20_24' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 20 AND 24', [$currentDate])
-                    ->count(),
-                '25_29' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 25 AND 29', [$currentDate])
-                    ->count(),
-                '30_34' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 30 AND 34', [$currentDate])
-                    ->count(),
-                '35_39' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 35 AND 39', [$currentDate])
-                    ->count(),
-                '40_44' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) BETWEEN 40 AND 44', [$currentDate])
-                    ->count(),
-                'over_45' => User::where('sexe', 'F')
-                    ->where('role', 'jeune')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, dateNaissance, ?) > 45', [$currentDate])
-                    ->count(),
-            ]
-        ];
-
-        return response()->json($statistics);
-    }
-
+    /**
+     * Récupère le nombre d'utilisateurs par région.
+     *
+     * @return JsonResponse Résultats sous forme de tableau avec 'region' et 'nombre'.
+     */
     public function getUsersByRegion()
     {
-        // Utilisation correcte de DB pour effectuer la requête
+        // Requête pour compter les utilisateurs par région
         $usersByRegion = User::select('region', DB::raw('COUNT(*) as nombre'))
             ->groupBy('region')
             ->get();
@@ -190,6 +60,11 @@ class TableauBordController extends Controller
         return response()->json($formattedResult);
     }
 
+    /**
+     * Récupère le nombre d'utilisateurs (jeunes) associés à chaque action.
+     *
+     * @return JsonResponse Résultats sous forme de tableau avec le nom de l'action et le nombre de jeunes associés.
+     */
     public function getJeunesByAction()
     {
         // Requête pour récupérer les actions avec le nombre de jeunes associés
@@ -205,17 +80,15 @@ class TableauBordController extends Controller
         return response()->json($result);
     }
 
-
-
+    /**
+     * Récupère le nombre de jeunes associés à chaque dispositif.
+     *
+     * @return JsonResponse Résultats sous forme de tableau avec le nom du dispositif et le nombre de jeunes.
+     */
     public function nombreJeunesParDispositif(): JsonResponse
     {
         // Récupérer le rôle "jeune"
         $roleJeune = Role::where('name', 'Jeune')->first();
-
-        // Vérifier si le rôle "jeune" existe
-        /*if (!$roleJeune) {
-            return response()->json(['error' => 'Rôle "jeune" non trouvé.'], 404);
-        }*/
 
         // Récupérer les dispositifs avec le nombre de "jeunes" associés
         $dispositifs = Dispositif::with(['structures.users' => function ($query) use ($roleJeune) {
@@ -236,41 +109,4 @@ class TableauBordController extends Controller
 
         return response()->json($resultats);
     }
-
-    public function getYoungUserStatistics()
-    {
-        $currentDate = Carbon::now();
-        $ageRanges = [
-            'under_14' => [null, 13],
-            '15_19' => [15, 19],
-            '20_24' => [20, 24],
-            '25_29' => [25, 29],
-            '30_34' => [30, 34],
-            '35_39' => [35, 39],
-            '40_44' => [40, 44],
-        ];
-
-        $statistics = ['M' => [], 'F' => []];
-
-        // Identifier le rôle "jeune"
-        $jeuneRoleId = Role::where('name', 'Jeune')->value('id');
-
-        foreach (['M', 'F'] as $sexe) {
-            foreach ($ageRanges as $key => [$min, $max]) {
-                $query = User::where('sexe', $sexe)
-                    ->where('role_id', $jeuneRoleId)
-                    ->whereRaw('EXTRACT(YEAR FROM AGE(dateNaissance)) >= ?', [$min ?? 0]);
-
-                if ($max !== null) {
-                    $query->whereRaw('EXTRACT(YEAR FROM AGE(dateNaissance)) <= ?', [$max]);
-                }
-
-                $statistics[$sexe][$key] = $query->count();
-            }
-        }
-
-        return response()->json($statistics);
-    }
-
-
 }
