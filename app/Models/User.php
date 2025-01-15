@@ -62,9 +62,13 @@ public function dispositif()
     {
         return $this->hasMany(Action::class, 'action_id');
     }*/
-    public function actionUser()
+ /*   public function actionUser()
     {
         return $this->hasMany(ActionUser::class, 'user_id');
+    }*/
+    public function actions()
+    {
+        return $this->hasMany(Action::class, 'user_id');
     }
     public function role()
     {
@@ -76,11 +80,16 @@ public function dispositif()
     }
 
     public function getAvatarUrlAttribute()
-{
+    {
     return $this->avatar ? asset('storage/' . $this->avatar) : null;
-}
+    }
+    public function sceances()
+    {
+        return $this->hasMany(Sceance::class, 'user_id');
+    }
 
-    
+
+
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -488,6 +488,35 @@ public function updatePassword(Request $request)
         }
     }
 
+    /**
+     * Description: Récupérer le nombre d'actions, le nombre de sessions  et de séances associées à un utilisateur ayant le rôle "Jeune".
+     * Méthode: GET
+     * Entrée: id (identifiant de l'utilisateur).
+     * Sortie: Nombre d'actions + nombre de séances + nombre de sessions + status 200 en cas de succès,
+     *         message d'erreur + status 404 si l'utilisateur est introuvable ou n'a pas le rôle requis.
+     */
+    public function getJeuneUserStatistics($id)
+    {
+        /*$user = User::with(['actions', 'sceances','sessions'])*/
+        $user = User::with(['actions'])
+            ->where('id', $id)
+            ->where('role_id', 2)
+            ->first();
+        if (!$user) {
+            return response()->json([
+                'error' => 'Utilisateur non trouvé ou ne correspond pas au rôle Jeune.'
+            ], 404);
+        }
+
+        $data = [
+            'actions_count' => $user->actions->count()
+           /* 'sceances_count' => $user->sceances->count(),*/
+           /* 'sessions_count' => $user->sessions->count(),*/
+        ];
+
+        return response()->json($data);
+    }
+
 }
 
 
