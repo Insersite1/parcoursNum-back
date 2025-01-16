@@ -365,7 +365,6 @@ class JeuneController extends Controller
 
 
 
-
     /**
      * Description: Mettre à jour les informations complètes d'un utilisateur avec le rôle "Jeune".
      * Méthode: PUT ou PATCH
