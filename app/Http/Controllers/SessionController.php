@@ -60,7 +60,7 @@ class SessionController extends Controller
             'date_debut' => 'sometimes|required|date',
             'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
             'file' => 'nullable|file|max:2048',
-            'par' => 'sometimes|required|string|max:255', // Nouveau champ
+            'par' => 'sometimes|required|string|max:255',
             'action_id' => 'nullable|exists:actions,id',
         ]);
 
@@ -71,8 +71,6 @@ class SessionController extends Controller
             }
             $validatedData['image'] = $request->file('image')->store('images', 'public');
         }
-
-        // Gestion du fichier
         if ($request->hasFile('file')) {
             if ($session->file) {
                 Storage::disk('public')->delete($session->file);

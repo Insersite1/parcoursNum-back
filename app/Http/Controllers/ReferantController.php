@@ -35,26 +35,29 @@ class ReferantController extends Controller
         try {
             // Validation des données
             $validated = $request->validate([
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif', // Avatar est optionnel
+                'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  //'nullable|string',
                 'nom' => 'nullable|string|max:255',
                 'prenom' => 'nullable|string|max:255',
                 'email' => 'required|email|unique:users,email',
-                'numTelephone' => 'nullable||string|max:20',
-                'password' => 'nullable||string', // Le mot de passe est requis avec une longueur minimale
+                'numTelephone' => 'nullable|string|max:20',
+                'password' => 'nullable|string', // Le mot de passe est requis avec une longueur minimale
                 'sexe' => 'nullable|in:M,F',
                 'adresse' => 'nullable|string|max:255',
-                'structure_id' => 'nullable||exists:structures,id',
+                'structure_id' => 'nullable|exists:structures,id',
             ]);
-
+            
+            $avatarName = null;
+            $referant=new User();
             // Gestion de l'avatar
-            $avatarPath = null;
-    if ($request->hasFile('avatar')) {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public'); // Enregistre dans storage/app/public/avatars
-    }
-
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+                $avatarName = time() . '.' . $avatar->extension();
+                $avatar->move(public_path('images'), $avatarName);
+                 $referant->avatar = $avatarName;
+            }
             // Création du référant
             $referant = User::create([
-                'avatar' => $validated['avatar'], // Avatar par défaut si pas fourni
+                'avatar' => $avatarName, // Avtar par défaut si pas fourni
                 'nom' => $validated['nom'],
                 'Prenom' => $validated['prenom'] ?? null,
                 'email' => $validated['email'],
@@ -103,7 +106,7 @@ class ReferantController extends Controller
     public function update(Request $request, $id)
     {
         $referant = Referant::findOrFail($id);
-        $referant->update($request->all()); // Met à jour le référant avec les données de la requête
+        $referant->update($request->all());
         return response()->json($referant);
     }
 
@@ -120,4 +123,32 @@ class ReferantController extends Controller
             'message' => 'Référant supprimé avec succès.',
         ]);
     }
+
+
+
+
+    public function updatereferantsetat($id)
+    {
+        $User = User::find($id); // Trouver l'utilisateur par son ID
+        if ($User) {
+            // Basculer l'état en fonction de la valeur actuelle
+            if ($User->statut == 'Active') {
+                $User->statut = 'Inactive';
+            } elseif ($User->statut == 'Inactive') {
+                $User->statut = 'Active';
+            }
+            
+            $User->save(); // Enregistrer les modifications
+            
+            return response()->json(['message' => 'État mis à jour avec succès.'], 200);
+        } else {
+            return response()->json(['error' => 'referent introuvable.'], 404);
+        }
+    }
+    
+
+
+
+
+
 }

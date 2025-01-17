@@ -30,12 +30,25 @@ Route::apiResource('sceances', SceanceController::class);
 
 //session
 Route::apiResource('sessions', SessionController::class);
-
 // Route de recherche de session
-//Route::get('sessions/search', [SessionController::class, 'search']);
 Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
+/////Midellware//////
+Route::middleware(['super_admin'])->group(function () {
+    // Routes accessibles uniquement par le super_admin
+});
 
+Route::middleware(['super_admin_manager'])->group(function () {
+    // Routes accessibles par le super_admin et le manager
+});
+
+Route::middleware(['super_admin_manager_referant'])->group(function () {
+    // Routes accessibles aux super_admins, managers et référents
+});
+
+Route::middleware(['jeune'])->group(function () {
+    // Routes accessibles aux jeunes
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -51,7 +64,7 @@ Route::apiResource('/actions', controller: \App\Http\Controllers\ActionControlle
 //////////////Dispositif///////////
 
 Route::get('dispositifs', [DispositifController::class, 'index']); // Récupérer tous les dispositifs
-Route::post('dispositifs', [DispositifController::class, 'store']); // Créer un dispositif
+Route::post('dispositifs', [DispositifController::class, 'store']); //  Créer un dispositif
 Route::get('dispositifs/{id}', [DispositifController::class, 'show']); // Récupérer un dispositif
 Route::put('dispositifs/{id}', [DispositifController::class, 'update']); // Mettre à jour un dispositif
 Route::delete('dispositifs/{id}', [DispositifController::class, 'destroy']); // Supprimer un dispositif
@@ -61,9 +74,9 @@ Route::delete('dispositifs/{id}', [DispositifController::class, 'destroy']); // 
 Route::get('structures', [StructureController::class, 'index']);
 Route::post('structures', [StructureController::class, 'store']);
 Route::get('structures/{id}', [StructureController::class, 'show']);
-Route::put('structures/{id}', [StructureController::class, 'update']);
+Route::put('/structures/{id}', [StructureController::class, 'update']);
 Route::delete('structures/{id}', [StructureController::class, 'destroy']);
-
+Route::put('/updatestructureetat/{id}', [StructureController::class,'updatestructureetat']);
 
 /////Structure Dispositif ////////////////
 
@@ -76,30 +89,47 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 
 //Manager
 
-Route::apiResource('/Manager',controller: \App\Http\Controllers\ManagerController::class);
+Route::apiResource('/Manager',controller: ManagerController::class);
 
 //Jeune
 
-Route::apiResource('/Jeune',controller: \App\Http\Controllers\JeuneController::class);
+Route::apiResource('/Jeune',controller: JeuneController::class);
 
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
+//Modifier mot passe du jeune avec jwt
+Route::middleware('jwt.auth')->post('/jeune/update-password', [JeuneController::class, 'updatePassword']);
+Route::middleware('jwt.auth')->post('/jeune/complete-profile', [JeuneController::class, 'completeProfile']);
+
+Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 
 
 //Référent
-
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
+
+// Route::put('/updatereferants/{id}',[\App\Http\Controllers\ReferantController::class,'updatereferants'])->name('updateAgent');
+
+
+Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
+
+
 
 
 //Dashboard
+/*Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);*/
+
+
+//Dashbor
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
-Route::get('/youth-statistics', [TableauBordController::class, 'getYouthStatistics']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+
+
+Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
+Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
+Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+
 
 Route::post('/login',[\App\Http\Controllers\AuthController::class,'login']);
 Route::post('/register',[\App\Http\Controllers\AuthController::class,'register']);
 
-Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
-
-Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);

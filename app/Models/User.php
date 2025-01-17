@@ -40,8 +40,9 @@ class User extends Authenticatable implements JWTSubject
             'AE',
             'Adresse',
             'role_id',
-            'structure_id'
-
+            'structure_id',
+            'accepter_conditions',
+            'dispositif_id',
     ];
 
     public function structure()
@@ -49,12 +50,21 @@ class User extends Authenticatable implements JWTSubject
     return $this->belongsTo(Structure::class, 'structure_id');
 }
 
+public function dispositif()
+{
+    return $this->belongsTo(Dispositif::class, 'dispositif_id');
+}
+
     /**
      * Relation avec le modèle Action
      */
-    public function actions()
+   /* public function actions()
     {
-        return $this->hasMany(Action::class, 'user_id');
+        return $this->hasMany(Action::class, 'action_id');
+    }*/
+    public function actionUser()
+    {
+        return $this->hasMany(ActionUser::class, 'user_id');
     }
     public function role()
     {
@@ -65,8 +75,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Action::class,'session_id');
     }
 
+    public function getAvatarUrlAttribute()
+{
+    return $this->avatar ? asset('storage/' . $this->avatar) : null;
+}
 
-
+    
     /**
      * The attributes that should be hidden for serialization.
      *

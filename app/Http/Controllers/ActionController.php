@@ -58,54 +58,83 @@ class ActionController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
-{
-    try {
-        // Validation des données
-        $validatedData = $request->validate([
-            'nom' => 'required|string',
-            'place' => 'required|string',
-            'couverture' => 'nullable|mimes:jpeg,png,jpg',
-            'type' => 'required|string',
-            'DateDebut' => 'required|date',
-            'DateFin' => 'required|date|after_or_equal:DateDebut',
-            'description' => 'required|string',
-            'couleur' => 'required|string',
-            'user_id' => 'exists:users,id',
-            'structure_dispositif_id' => 'exists:structure_dispositifs,id',
-        ]);
 
-        // Création de l'instance d'Action
-        $action = new Action();
 
-        $action->nom = $validatedData['nom'];
-        $action->place = $validatedData['place'];
-        $action->type = $validatedData['type'];
-        $action->DateDebut = $validatedData['DateDebut'];
-        $action->DateFin = $validatedData['DateFin'];
-        $action->description = $validatedData['description'];
-        $action->couleur = $validatedData['couleur'];
-        $action->user_id = $validatedData['user_id'];
-        $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
+     public function store(Request $request)
+     {
+         try {
+             // Validation des données
+             $validatedData = $request->validate([
+                'couverture' => 'mimes:jpeg,png,jpg,gif',
+                 'nom' => 'required|string',
+                 'place' => 'required|string',
+                 'type' => 'required|string',
+                 'DateDebut' => 'required|date',
+                 'DateFin' => 'required|date|after_or_equal:DateDebut',
+                 'description' => 'required|string',
+                 'couleur' => 'required|string',
+                 'users' => 'nullable|array',
+                 'users.*' => 'required|integer|exists:users,id',
+                 'structure_id' => 'required|exists:structures,id',
+                 'dispositif_id' => 'required|exists:dispositifs,id',
+                 'auteur' => 'required|string',
+                 'statut' => 'in:Active,Inactive',
+             ]);
 
-        // Gestion de l'image de couverture
-        if ($request->hasFile('couverture')) {
-            $file = $request->file('couverture');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $fileName);
-            $action->couverture = $fileName;
-        }
+             // Validation ou création de l'association structure_dispositif
+             $structureDispositif = StructureDispositif::firstOrCreate([
+                 'structure_id' => $validatedData['structure_id'],
+                 'dispositif_id' => $validatedData['dispositif_id'],
+             ]);
 
-        // Sauvegarde de l'action
-        $action->save();
+             // Ajoutez l'ID du structure_dispositif dans les données validées
+             $validatedData['structure_dispositif_id'] = $structureDispositif->id;
 
-        return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'action.', 'error' => $e->getMessage()], 500);
+             // Vérifiez si des utilisateurs sont associés
+             $userId = null;
+             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
+                 $userId = $validatedData['users'][0];
+             }
+
+             // Créez l'action
+             $action = new Action();
+
+             if ($request->hasFile('couverture')) {
+                $couverture = $request->file('avatar');
+                $couvertureName = time() . '.' . $couverture->extension();
+                $couverture->move(public_path('images'), $couvertureName);
+                $action->couverture = $couvertureName;
             }
-}
+             $action->nom = $validatedData['nom'];
+             $action->place = $validatedData['place'];
+             $action->type = $validatedData['type'];
+             $action->DateDebut = $validatedData['DateDebut'];
+             $action->DateFin = $validatedData['DateFin'];
+             $action->description = $validatedData['description'];
+             $action->couleur = $validatedData['couleur'];
+             $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
+             $action->auteur = $validatedData['auteur'];
+             $action->statut = $validatedData['statut'];
+             $action->user_id = $userId;
+
+             // Sauvegardez l'action
+             $action->save();
+
+             // Attachez d'autres utilisateurs à l'action
+             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
+                 $action->users()->attach($validatedData['users']);
+             }
+
+             return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
+         } catch (\Illuminate\Validation\ValidationException $e) {
+             return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'message' => 'Une erreur est survenue lors de la création de l\'action.',
+                 'error' => $e->getMessage(),
+             ], 500);
+         }
+     }
 
 
     /**
@@ -169,4 +198,7 @@ class ActionController extends Controller
 
         return response()->json(['message' => 'Action supprimée avec succès'], 200);
     }
+
+
+
 }
