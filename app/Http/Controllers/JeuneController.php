@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class JeuneController extends Controller
 {
@@ -93,7 +94,7 @@ class JeuneController extends Controller
 
             return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user], 201);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             // Retourner les erreurs de validation
             return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
         } catch (Exception $e) {
@@ -134,7 +135,6 @@ class JeuneController extends Controller
 
 
 
-
     /**
      * Display the specified resource.
      */
@@ -150,7 +150,7 @@ class JeuneController extends Controller
                 'user' => $user
             ], 200);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
 
             return response()->json([
                 'message' => 'Utilisateur non trouvé.'
@@ -176,7 +176,7 @@ class JeuneController extends Controller
     public function update(Request $request, $id)
 {
     try {
-        
+
         $validatedData = $request->validate([
             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
             'nom' => 'nullable|string',
@@ -214,7 +214,7 @@ class JeuneController extends Controller
 
         return response()->json(['message' => 'Utilisateur mis à jour avec succès.', 'user' => $user]);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
+    } catch (ValidationException $e) {
 
         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
     } catch (Exception $e) {
@@ -260,7 +260,7 @@ class JeuneController extends Controller
                     'role' => $roleName
                 ], 200);
 
-            } catch (\Illuminate\Validation\ValidationException $e) {
+            } catch (ValidationException $e) {
                 return response()->json([
                     'message' => 'Utilisateur non trouvé.'
                 ], 404);
