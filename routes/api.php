@@ -31,11 +31,12 @@ use App\Http\Controllers\TableauBordController;
 Route::apiResource('sceances', SceanceController::class);
 
 //session
-Route::apiResource('sessions', SessionController::class);
+ Route::apiResource('sessions', SessionController::class);
 
+ Route::post('sessions/{session}/upload', [SessionController::class, 'uploadFile']);
 // Route de recherche de session
-//Route::get('sessions/search', [SessionController::class, 'search']);
-Route::get('sessions/find/{search}', [SessionController::class, 'search']);
+ //Route::get('sessions/search', [SessionController::class, 'search']);
+ Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 /////Midellware//////
 Route::middleware(['super_admin'])->group(function () {

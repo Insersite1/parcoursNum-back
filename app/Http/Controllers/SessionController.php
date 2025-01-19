@@ -85,6 +85,52 @@ class SessionController extends Controller
         return response()->json($session);
     }
 
+    // Met à jour les upload une session
+    // avec la methode post
+    public function uploadFile(Request $request, Session $session)
+    {
+        // Validation des fichiers
+        $validatedData = $request->validate([
+            'image' => 'nullable|image|max:2048', // Validation pour les images
+            'file' => 'nullable|file|max:2048',  // Validation pour d'autres fichiers
+        ]);
+
+        // Sauvegarde de l'image si elle est fournie
+        if ($request->hasFile('image')) {
+            $previousImage = $session->image;
+
+            // Supprimer l'ancienne image si elle existe
+            if ($previousImage) {
+                Storage::disk('public')->delete($previousImage);
+            }
+
+            // Sauvegarder la nouvelle image
+            $validatedData['image'] = $request->file('image')->store('images', 'public');
+        }
+
+        // Sauvegarde du fichier si fourni
+        if ($request->hasFile('file')) {
+            $previousFile = $session->file;
+
+            // Supprimer l'ancien fichier si existant
+            if ($previousFile) {
+                Storage::disk('public')->delete($previousFile);
+            }
+
+            // Sauvegarder le nouveau fichier
+            $validatedData['file'] = $request->file('file')->store('files', 'public');
+        }
+
+        // Mise à jour de la session avec les nouveaux fichiers
+        $session->update($validatedData);
+
+        return response()->json([
+            'message' => 'Fichiers mis à jour avec succès',
+            'session' => $session,
+        ]);
+    }
+
+
     // Supprime une session
     public function destroy(Session $session)
     {
