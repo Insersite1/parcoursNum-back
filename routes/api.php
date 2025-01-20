@@ -169,6 +169,8 @@ Route::middleware('auth:api')->group(function () {
 
 });
 
+Route::get('/distributionJeunesByAge', [App\Http\Controllers\TableauBordController::class, 'distributionJeunesByAge']);
+
 
 // Routes Sondages
 Route::apiResource('sondages', SondageController::class);
