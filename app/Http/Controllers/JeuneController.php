@@ -60,9 +60,8 @@ class JeuneController extends Controller
             'Prenom' => 'nullable|string',
             'email' => 'required|string|email|unique:users',
             'numTelephone' => 'required|string',
-//            'role_id' => 'exists:roles,id',
             'sexe' => 'required|string',
-            'accept_conditions' => 'required|accepted',
+
         ]);
 
         // Création de l'utilisateur
@@ -150,25 +149,25 @@ class JeuneController extends Controller
  * @return \Illuminate\Http\JsonResponse La réponse JSON contenant l'utilisateur ou un message d'erreur.
  */
 
-    public function show($id)
+    public function show(Request $request)
     {
         try {
+            // Récupérer l'ID de l'utilisateur connecté
+            $userId = Auth::id();  // Récupère l'ID de l'utilisateur authentifié
 
-            $user = User::with('role')->where('role_id', 2)->findOrFail($id);
-
+            // Vérifier si l'utilisateur a le rôle 'jeune'
+            $user = User::with('role')->where('role_id', 2)->findOrFail($userId);
 
             return response()->json([
                 'message' => 'Utilisateur trouvé avec succès.',
                 'user' => $user
             ], 200);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Utilisateur non trouvé.'
             ], 404);
         } catch (Exception $e) {
-
             return response()->json([
                 'message' => 'Une erreur est survenue.',
                 'error' => $e->getMessage()
@@ -178,53 +177,54 @@ class JeuneController extends Controller
 
 
 
-    public function update(Request $request, $id)
-{
-    try {
 
-        $validatedData = $request->validate([
-            'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
-            'nom' => 'nullable|string',
-            'Prenom' => 'nullable|string',
-            'email' => 'required|string|email|unique:users,email,' . $id,
-            'numTelephone' => 'required|string',
-            'role_id' => 'exists:roles,id',
-            'sexe' => 'required|string',
-        ]);
+//     public function update(Request $request, $id)
+// {
+//     try {
 
-        $user = User::findOrFail($id);
+//         $validatedData = $request->validate([
+//             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
+//             'nom' => 'nullable|string',
+//             'Prenom' => 'nullable|string',
+//             'email' => 'required|string|email|unique:users,email,' . $id,
+//             'numTelephone' => 'required|string',
+//             'role_id' => 'exists:roles,id',
+//             'sexe' => 'required|string',
+//         ]);
 
-
-        if ($request->hasFile('avatar')) {
-
-            if ($user->avatar) {
-                unlink(public_path('images') . '/' . $user->avatar);
-            }
-            $avatar = $request->file('avatar');
-            $avatarName = time() . '.' . $avatar->extension();
-            $avatar->move(public_path('images'), $avatarName);
-            $user->avatar = $avatarName;
-        }
-
-        $user->nom = $validatedData['nom'] ?? $user->nom;
-        $user->Prenom = $validatedData['Prenom'] ?? $user->Prenom;
-        $user->email = $validatedData['email'];
-        $user->numTelephone = $validatedData['numTelephone'];
-        $user->role_id = $validatedData['role_id'] ?? $user->role_id;
-        $user->sexe = $validatedData['sexe'];
-        $user->save();
+//         $user = User::findOrFail($id);
 
 
-        return response()->json(['message' => 'Utilisateur mis à jour avec succès.', 'user' => $user]);
+//         if ($request->hasFile('avatar')) {
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
+//             if ($user->avatar) {
+//                 unlink(public_path('images') . '/' . $user->avatar);
+//             }
+//             $avatar = $request->file('avatar');
+//             $avatarName = time() . '.' . $avatar->extension();
+//             $avatar->move(public_path('images'), $avatarName);
+//             $user->avatar = $avatarName;
+//         }
 
-        return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-    } catch (Exception $e) {
+//         $user->nom = $validatedData['nom'] ?? $user->nom;
+//         $user->Prenom = $validatedData['Prenom'] ?? $user->Prenom;
+//         $user->email = $validatedData['email'];
+//         $user->numTelephone = $validatedData['numTelephone'];
+//         $user->role_id = $validatedData['role_id'] ?? $user->role_id;
+//         $user->sexe = $validatedData['sexe'];
+//         $user->save();
 
-        return response()->json(['message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.', 'error' => $e->getMessage()], 500);
-    }
-}
+
+//         return response()->json(['message' => 'Utilisateur mis à jour avec succès.', 'user' => $user]);
+
+//     } catch (\Illuminate\Validation\ValidationException $e) {
+
+//         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+//     } catch (Exception $e) {
+
+//         return response()->json(['message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.', 'error' => $e->getMessage()], 500);
+//     }
+// }
 
 
 /**
@@ -285,29 +285,29 @@ class JeuneController extends Controller
       /**
  * Modifier le mot de passe d'un jeune avec JWT.
  */
-public function updatePassword(Request $request)
-{
-    // Validation des données
-    $request->validate([
-        'current_password' => 'required|string',
-        'new_password' => 'required|string|min:8|confirmed',
-    ]);
+    public function updatePassword(Request $request)
+    {
+        // Validation des données
+        $request->validate([
+            'token' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
 
-    $user = auth()->user();
-    $user = User::find($user->id);
+        // Trouver l'utilisateur via le token de confirmation
+        $user = User::where('confirmation_token', $request->token)->first();
 
+        if (!$user) {
+            return response()->json(['message' => 'Token invalide ou utilisateur non trouvé.'], 404);
+        }
 
-    // Vérification du mot de passe actuel
-    if (!Hash::check($request->current_password, $user->password)) {
-        return response()->json(['message' => 'Le mot de passe actuel est incorrect.'], 400);
+        // Mise à jour du mot de passe
+        $user->password = Hash::make($request->new_password);
+        $user->confirmation_token = null; // Invalider le token après utilisation
+        $user->save();
+
+        return response()->json(['message' => 'Mot de passe mis à jour avec succès.']);
     }
 
-    // Mise à jour du mot de passe
-    $user->password = Hash::make($request->new_password);
-    $user->save();
-
-    return response()->json(['message' => 'Mot de passe mis à jour avec succès.']);
-}
 
 
 
