@@ -36,5 +36,7 @@ Route::prefix('auth')->group(function () {
         });
 });
 
+Route::get('/distributionJeunesByAge', [App\Http\Controllers\TableauBordController::class, 'distributionJeunesByAge']);
+
 
 

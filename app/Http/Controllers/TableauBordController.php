@@ -121,7 +121,7 @@ class TableauBordController extends Controller
             return response()->json(['error' => 'Rôle "Jeune" non trouvé'], 404);
         }
 
-        // Initialiser les tranches d'âge
+        // Définir les tranches d'âge
         $tranches = [
             '<14' => [0, 14],
             '15-19' => [15, 19],
@@ -130,26 +130,29 @@ class TableauBordController extends Controller
             '30-34' => [30, 34],
             '35-39' => [35, 39],
             '40-44' => [40, 44],
-            '>45' => [45, 100] // Supposons un maximum d'âge
+            '>45' => [45, 100], // Âge maximum supposé
         ];
 
         $distribution = [];
 
         foreach ($tranches as $tranche => [$minAge, $maxAge]) {
+            // Calculer le nombre d'hommes et de femmes dans chaque tranche
             $hommes = User::where('role_id', $roleId)
-                ->where('gender', 'Homme') // Supposons une colonne "gender"
-                ->whereBetween('age', [$minAge, $maxAge])
-                ->count();
-
-            $femmes = User::where('role_id', $roleId)
-                ->where('gender', 'Femme') // Supposons une colonne "gender"
-                ->whereBetween('age', [$minAge, $maxAge])
+                ->where('sexe', 'M') // Homme
+                ->whereNotNull('dateNaissance')
+                //->whereRaw('EXTRACT(YEAR FROM AGE(dateNaissance)) BETWEEN ? AND ?', [$minAge, $maxAge])
+                //->count();
+            ;
+                $femmes = User::where('role_id', $roleId)
+                ->where('sexe', 'F') // Femme
+                ->whereNotNull('dateNaissance')
+               // ->whereRaw('TIMESTAMPDIFF(dateNaissance, CURDATE()) BETWEEN ? AND ?', [$minAge, $maxAge])
                 ->count();
 
             $distribution[] = [
                 'tranche' => $tranche,
                 'hommes' => $hommes,
-                'femmes' => $femmes
+                'femmes' => $femmes,
             ];
         }
 
