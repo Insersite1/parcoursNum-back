@@ -116,6 +116,8 @@ class ReferantController extends Controller
              'email' => 'required|string|email|unique:users,email,' . $id,
              'sexe' => 'required|string',
              'Adresse' => 'required|string',
+             'structure_id' => 'nullable|exists:structures,id',
+
 
          ]);
      
@@ -136,11 +138,12 @@ class ReferantController extends Controller
         //  Mise à jour des champs 'nom' et 'prenom'
         // $user->avatar = $request->input(' $avatarName');
          $user->nom = $request->input('nom');
-         $user->Prenom = $request->input('Prenom', null); // 'prenom' peut être nul
-         $user->numTelephone = $request->input('numTelephone', null); // 'prenom' peut être nul
-         $user->email = $request->input('email', null); // 'prenom' peut être nul
-         $user->sexe = $request->input('sexe', null); // 'prenom' peut être nul
-         $user->Adresse = $request->input('Adresse', null); // 'prenom' peut être nul
+         $user->Prenom = $request->input('Prenom', null);
+         $user->numTelephone = $request->input('numTelephone', null); 
+         $user->email = $request->input('email', null); 
+         $user->sexe = $request->input('sexe', null); 
+         $user->Adresse = $request->input('Adresse', null);
+         $user->structure_id = $request->input('structure_id'); 
 
 
     

@@ -114,11 +114,6 @@ class StructureController extends Controller
 
 
 
-
-
-
-
-
  public function destroy($id)
     {
         $structure = Structure::find($id);
