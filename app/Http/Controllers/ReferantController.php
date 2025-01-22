@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
 
 class ReferantController extends Controller
 {
@@ -36,16 +38,16 @@ class ReferantController extends Controller
             $validated = $request->validate([
                 'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  //'nullable|string',
                 'nom' => 'nullable|string|max:255',
-                'prenom' => 'nullable|string|max:255',
+                'Prenom' => 'nullable|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'numTelephone' => 'nullable|string|max:20',
                 'password' => 'nullable|string', // Le mot de passe est requis avec une longueur minimale
                 'sexe' => 'nullable|in:M,F',
-                'adresse' => 'nullable|string|max:255',
+                'Adresse' => 'nullable|string|max:255',
                 'structure_id' => 'nullable|exists:structures,id',
             ]);
             
-            $avatarName = null;
+           $avatarName = null;
             $referant=new User();
             // Gestion de l'avatar
             if ($request->hasFile('avatar')) {
@@ -58,14 +60,14 @@ class ReferantController extends Controller
             $referant = User::create([
                 'avatar' => $avatarName, // Avtar par défaut si pas fourni
                 'nom' => $validated['nom'],
-                'Prenom' => $validated['prenom'] ?? null,
+                'Prenom' => $validated['Prenom'] ?? null,
                 'email' => $validated['email'],
                 'numTelephone' => $validated['numTelephone'],
                 'password' => Hash::make($validated['password']), // Hashage du mot de passe
                 'statut' => 'Active',
                 'sexe' => $validated['sexe'] ?? null,
-                'Adresse' => $validated['adresse'] ?? null,
-                'role_id' => 4,
+                'Adresse' => $validated['Adresse'] ?? null,
+                'role_id' => 4, 
                 'structure_id' => $validated['structure_id'],
             ]);
         
@@ -102,17 +104,63 @@ class ReferantController extends Controller
     /**
      * Mise à jour d'un référant.
      */
-    public function update(Request $request, $id)
-    {
-        $referant = Referant::findOrFail($id);
-        $referant->update($request->all());
-        return response()->json($referant);
-    }
+    
+     public function update(Request $request, $id)
+     {
+         // Validation des données
+         $request->validate([
+            // 'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  //'nullable|string',
+             'nom' =>'required|string|max:255',
+             'Prenom' =>'required|string|max:255',
+             'numTelephone' =>'required|string|max:255',
+             'email' => 'required|string|email|unique:users,email,' . $id,
+             'sexe' => 'required|string',
+             'Adresse' => 'required|string',
+
+         ]);
+     
+         // Récupération de l'utilisateur par son ID
+         $user = User::find($id);
+        // $avatarName = null;         
+        //  if ($request->hasFile('avatar')) {
+        //      $avatar = $request->file('avatar');
+        //      $avatarName = time() . '.' . $avatar->extension();
+        //      $avatar->move(public_path('images'), $avatarName);
+        //       $user->avatar = $avatarName;
+        //  }
+         // Vérification si l'utilisateur existe
+         if (!$user) {
+             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+         }
+     
+        //  Mise à jour des champs 'nom' et 'prenom'
+        // $user->avatar = $request->input(' $avatarName');
+         $user->nom = $request->input('nom');
+         $user->Prenom = $request->input('Prenom', null); // 'prenom' peut être nul
+         $user->numTelephone = $request->input('numTelephone', null); // 'prenom' peut être nul
+         $user->email = $request->input('email', null); // 'prenom' peut être nul
+         $user->sexe = $request->input('sexe', null); // 'prenom' peut être nul
+         $user->Adresse = $request->input('Adresse', null); // 'prenom' peut être nul
+
+
+    
+         // Sauvegarde des modifications
+         $user->save();
+     
+         // Retourner la réponse avec les nouvelles données
+         return response()->json([
+             'success' => true,
+             'message' => 'Utilisateur mis à jour avec succès',
+             'data' => $user
+         ]);
+     }
+     
+  
 
     /**
      * Suppression d'un référant.
      */
-    public function destroy($id)
+    public function destroyreferent($id)
     {
         $referant = User::where('role_id', 4)->findOrFail($id);
         $referant->delete();
@@ -122,8 +170,6 @@ class ReferantController extends Controller
             'message' => 'Référant supprimé avec succès.',
         ]);
     }
-
-
 
 
     public function updatereferantsetat($id)
