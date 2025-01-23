@@ -98,7 +98,7 @@ class JeuneController extends Controller
         // Réponse avec succès
         return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user,'token' => $token], 201);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
+    } catch (ValidationException $e) {
 
         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
     } catch (Exception $e) {
@@ -270,7 +270,7 @@ class JeuneController extends Controller
                     'role' => $roleName
                 ], 200);
 
-            } catch (\Illuminate\Validation\ValidationException $e) {
+            } catch (ValidationException $e) {
                 return response()->json([
                     'message' => 'Utilisateur non trouvé.'
                 ], 404);
