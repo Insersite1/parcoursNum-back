@@ -10,6 +10,11 @@ class Referant extends Model
     use HasFactory;
 
 
+
+    protected $fillable = [
+        'avatar', 'nom', 'Prenom', 'email', 'numTelephone', 'password', 
+        'statut', 'sexe', 'Adresse', 'structure_id', 'role_id'
+    ];
     public function structure()
 {
     return $this->belongsTo(Structure::class);

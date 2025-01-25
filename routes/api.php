@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 /// Action
 
+Route::apiResource('/Jeune',controller: \App\Http\Controllers\UserController::class);
 Route::apiResource('/actions', controller: \App\Http\Controllers\ActionController::class);
 
 
@@ -110,6 +111,10 @@ Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 
 //Référent
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
+Route::get('/destroyreferent/{id}', [\App\Http\Controllers\ReferantController::class,'destroyreferent']);
+Route::put('/updatesref/{id}',[\App\Http\Controllers\ReferantController::class,'updatesref']);
+Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
+
 
 // Route::put('/updatereferants/{id}',[\App\Http\Controllers\ReferantController::class,'updatereferants'])->name('updateAgent');
 
