@@ -28,6 +28,7 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at',
             'password',
             'statut',
+            'etat',
             'situation',
             'sexe',
             'etatCivil',
@@ -80,7 +81,7 @@ public function dispositif()
     return $this->avatar ? asset('storage/' . $this->avatar) : null;
 }
 
-    
+
     /**
      * The attributes that should be hidden for serialization.
      *
