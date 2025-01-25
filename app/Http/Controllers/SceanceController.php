@@ -116,6 +116,70 @@ class SceanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, $id)
+    // {
+    //     try {
+    //         // Récupération de la séance à mettre à jour
+    //         $sceance = Sceance::findOrFail($id);
+
+    //         // Validation des données
+    //         $request->validate([
+    //             'nom' => 'required|string|max:255',
+    //             'par' => 'nullable|string|max:255', // Champ facultatif
+    //             'session_code' => 'required|string|max:255',
+    //             'description' => 'nullable|string',
+    //             'date_debut' => 'required|date',
+    //             'date_fin' => 'required|date|after_or_equal:date_debut',
+    //             'session_id' => 'nullable|exists:sessions,id', // Relation clé étrangère
+    //             'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    //         ]);
+
+    //         // Mise à jour des champs texte et numériques
+    //         $sceance->nom = $request->nom;
+    //         $sceance->par = $request->par;
+    //         $sceance->session_code = $request->session_code;
+    //         $sceance->description = $request->description;
+    //         $sceance->date_debut = $request->date_debut;
+    //         $sceance->date_fin = $request->date_fin;
+    //         $sceance->session_id = $request->session_id;
+
+    //         // Gestion de la couverture
+    //         if ($request->hasFile('couverture')) {
+    //             // Suppression de l'ancienne image si elle existe
+    //             if ($sceance->couverture) {
+    //                 Storage::disk('public')->delete($sceance->couverture);
+    //             }
+    //             // Stockage de la nouvelle image
+    //             $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
+    //             $sceance->couverture = $couverturePath;
+    //         }
+
+    //         // Sauvegarde des modifications
+    //         $sceance->save();
+
+    //         // Réponse en cas de succès
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Séance mise à jour avec succès',
+    //             'data' => $sceance
+    //         ], 200);
+
+    //     } catch (ModelNotFoundException $e) {
+    //         // Réponse en cas de séance introuvable
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Séance introuvable',
+    //         ], 404);
+    //     } catch (Exception $e) {
+    //         // Réponse en cas d'erreur générale
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Une erreur est survenue lors de la mise à jour de la séance.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function update(Request $request, $id)
     {
         try {
@@ -124,34 +188,36 @@ class SceanceController extends Controller
 
             // Validation des données
             $request->validate([
-                'nom' => 'required|string|max:255',
+                'nom' => 'sometimes|required|string|max:255',
                 'par' => 'nullable|string|max:255', // Champ facultatif
-                'session_code' => 'required|string|max:255',
+                'session_code' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
-                'date_debut' => 'required|date',
-                'date_fin' => 'required|date|after_or_equal:date_debut',
+                'date_debut' => 'sometimes|required|date',
+                'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
                 'session_id' => 'nullable|exists:sessions,id', // Relation clé étrangère
-                'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
             // Mise à jour des champs texte et numériques
-            $sceance->nom = $request->nom;
-            $sceance->par = $request->par;
-            $sceance->session_code = $request->session_code;
-            $sceance->description = $request->description;
-            $sceance->date_debut = $request->date_debut;
-            $sceance->date_fin = $request->date_fin;
-            $sceance->session_id = $request->session_id;
-
-            // Gestion de la couverture
-            if ($request->hasFile('couverture')) {
-                // Suppression de l'ancienne image si elle existe
-                if ($sceance->couverture) {
-                    Storage::disk('public')->delete($sceance->couverture);
-                }
-                // Stockage de la nouvelle image
-                $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
-                $sceance->couverture = $couverturePath;
+            if ($request->has('nom')) {
+                $sceance->nom = $request->nom;
+            }
+            if ($request->has('par')) {
+                $sceance->par = $request->par;
+            }
+            if ($request->has('session_code')) {
+                $sceance->session_code = $request->session_code;
+            }
+            if ($request->has('description')) {
+                $sceance->description = $request->description;
+            }
+            if ($request->has('date_debut')) {
+                $sceance->date_debut = $request->date_debut;
+            }
+            if ($request->has('date_fin')) {
+                $sceance->date_fin = $request->date_fin;
+            }
+            if ($request->has('session_id')) {
+                $sceance->session_id = $request->session_id;
             }
 
             // Sauvegarde des modifications
