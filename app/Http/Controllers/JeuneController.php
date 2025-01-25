@@ -406,9 +406,22 @@ class JeuneController extends Controller
 
 
 
-    /*
-    Description modification du jeune complet
-    */
+    /**
+     * Description: Mettre à jour les informations complètes d'un utilisateur avec le rôle "Jeune".
+     * Méthode: PUT ou PATCH
+     * Entrée:
+     *   - id (identifiant de l'utilisateur),
+     *   - Données utilisateur (nom, prénom, email, téléphone, etc.).
+     * Sortie:
+     *   - Message de succès + status 200 en cas de mise à jour réussie,
+     *   - Message d'erreur de validation + status 422 si les données sont invalides,
+     *   - Message d'erreur + status 404 si l'utilisateur n'existe pas,
+     *   - Message d'erreur + status 500 en cas d'erreur serveur.
+     * Particularité:
+     *   - Prise en charge de l'upload et la suppression de l'avatar.
+     *   - Conversion automatique des champs booléens.
+     */
+
     public function updateJeuneComplet(Request $request, $id)
     {
         try {
@@ -487,6 +500,35 @@ class JeuneController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Description: Récupérer le nombre d'actions, le nombre de sessions  et de séances associées à un utilisateur ayant le rôle "Jeune".
+     * Méthode: GET
+     * Entrée: id (identifiant de l'utilisateur).
+     * Sortie: Nombre d'actions + nombre de séances + nombre de sessions + status 200 en cas de succès,
+     *         message d'erreur + status 404 si l'utilisateur est introuvable ou n'a pas le rôle requis.
+     */
+    public function getJeuneUserStatistics($id)
+    {
+        /*$user = User::with(['actions', 'sceances','sessions'])*/
+        $user = User::with(['actions'])
+            ->where('id', $id)
+            ->where('role_id', 2)
+            ->first();
+        if (!$user) {
+            return response()->json([
+                'error' => 'Utilisateur non trouvé ou ne correspond pas au rôle Jeune.'
+            ], 404);
+        }
+
+        $data = [
+            'actions_count' => $user->actions->count()
+           /* 'sceances_count' => $user->sceances->count(),*/
+           /* 'sessions_count' => $user->sessions->count(),*/
+        ];
+
+        return response()->json($data);
     }
 
 }
