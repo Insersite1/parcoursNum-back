@@ -52,7 +52,7 @@ class SceanceController extends Controller
             // Gestion de l'upload de l'image de couverture
             $couverturePath = null;
             if ($request->hasFile('couverture')) {
-                $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
+                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
             }
 
             // Création de la nouvelle séance
@@ -198,26 +198,23 @@ class SceanceController extends Controller
             ]);
 
             // Mise à jour des champs texte et numériques
-            if ($request->has('nom')) {
-                $sceance->nom = $request->nom;
-            }
-            if ($request->has('par')) {
-                $sceance->par = $request->par;
-            }
-            if ($request->has('session_code')) {
-                $sceance->session_code = $request->session_code;
-            }
-            if ($request->has('description')) {
-                $sceance->description = $request->description;
-            }
-            if ($request->has('date_debut')) {
-                $sceance->date_debut = $request->date_debut;
-            }
-            if ($request->has('date_fin')) {
-                $sceance->date_fin = $request->date_fin;
-            }
-            if ($request->has('session_id')) {
-                $sceance->session_id = $request->session_id;
+            $sceance->nom = $request->nom;
+            $sceance->par = $request->par;
+            $sceance->session_code = $request->session_code;
+            $sceance->description = $request->description;
+            $sceance->date_debut = $request->date_debut;
+            $sceance->date_fin = $request->date_fin;
+            $sceance->session_id = $request->session_id;
+
+            // Gestion de la couverture
+            if ($request->hasFile('couverture')) {
+                // Suppression de l'ancienne image si elle existe
+                if ($sceance->couverture) {
+                    Storage::disk('public')->delete($sceance->couverture);
+                }
+                // Stockage de la nouvelle image
+                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
+                $sceance->couverture = $couverturePath;
             }
 
             // Sauvegarde des modifications

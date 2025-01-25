@@ -142,6 +142,7 @@ Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantControlle
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+Route::get('/distributionJeunesByAge', [TableauBordController::class, 'distributionJeunesByAge']);
 
 
 Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
