@@ -43,6 +43,7 @@ class User extends Authenticatable implements JWTSubject
             'structure_id',
             'accepter_conditions',
             'dispositif_id',
+            'dateNaissance',
     ];
 
     public function structure()

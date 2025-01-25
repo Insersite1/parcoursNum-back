@@ -14,8 +14,8 @@ class Structure extends Model
     {
         return $this->hasMany(User::class, 'structure_id');
     }
-    
-    
+
+
 
     public function referant()
     {

@@ -7,6 +7,7 @@ use App\Models\Session;
 use App\Models\Structure;
 use App\Models\StructureDispositif;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -36,20 +37,17 @@ class StructureController extends Controller
             'nomcomplet' => 'required|string|max:255',
             'dateExpire' => 'required|date',
             'statut' => 'required|in:Active,Inactive',
-            'couverture' => 'nullable|mimes:jpeg,png,jpg,gif',
+            'couverture' => 'nullable|mimes:jpg,jpeg,png,gif',
         ]);
-
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
         $avatarName = null;
         if ($request->hasFile('couverture')) {
             $couverture = $request->file('couverture');
             $avatarName = time() . '.' . $couverture->extension();
             $couverture->move(public_path('images'), $avatarName);
         }
-
         $structure = Structure::create([
             'nomcomplet' => $request->nomcomplet,
             'dateExpire' => $request->dateExpire,
@@ -153,25 +151,54 @@ class StructureController extends Controller
      * Entrée: Données partiellement ou complètement mises à jour.
      * Sortie: Structure mise à jour avec status 200.
      */
-    public function update(Request $request, Structure $structure)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'nomcomplet' => 'sometimes|required|string|max:255',
-            'dateExpire' => 'sometimes|required|date',
-            'statut' => 'sometimes|required|in:Active,Inactive',
-            'couverture' => 'nullable|image|max:2048',
-        ]);
-        if ($request->hasFile('couverture')) {
-            if ($structure->couverture) {
-                Storage::disk('public')->delete($structure->couverture);
+        try {
+            // Validation des données
+            $validatedData = $request->validate([
+                'nomcomplet' => 'nullable|string|max:255',
+                'dateExpire' => 'nullable|date',
+                'statut' => 'nullable|in:Active,Inactive',
+                'couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            // Récupération de la structure existante
+            $structure = Structure::findOrFail($id);
+
+            // Si un fichier de couverture est présent, on le traite
+            if ($request->hasFile('couverture')) {
+                $couverture = $request->file('couverture');
+                $imageName = time() . '.' . $couverture->extension();
+                $couverture->move(public_path('images'), $imageName);
+                $structure->couverture = $imageName; // Mise à jour du nom de l'image dans la DB
             }
-            $validatedData['couverture'] = $request->file('couverture')->store('couvertures', 'public');
+
+            // Mise à jour des autres champs
+            $structure->nomcomplet = $validatedData['nomcomplet'] ?? $structure->nomcomplet;
+            $structure->dateExpire = $validatedData['dateExpire'] ?? $structure->dateExpire;
+            $structure->statut = $validatedData['statut'] ?? $structure->statut;
+
+            // Sauvegarde des modifications
+            $structure->save();
+
+            // Actualisation des données et réponse
+            return response()->json([
+                'message' => 'Structure mise à jour avec succès.',
+                'structure' => $structure,
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue lors de la mise à jour de la structure.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        $structure->update($validatedData);
-        return response()->json($structure);
     }
-
-
 
     /**
      * Description: Supprimer une structure.

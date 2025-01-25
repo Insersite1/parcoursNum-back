@@ -109,4 +109,60 @@ class TableauBordController extends Controller
 
         return response()->json($resultats);
     }
+
+    /**
+     * Renvoie la distribution des utilisateurs ayant le rôle "Jeune" par tranches d'âge et par sexe.
+     *
+     * - Récupère les utilisateurs avec le rôle "Jeune".
+     * - Classe ces utilisateurs dans des tranches d'âge prédéfinies.
+     * - Calcule le nombre d'hommes et de femmes dans chaque tranche.
+     * - Retourne un tableau JSON contenant la répartition.
+     *
+     * @return JsonResponse Répartition par tranche d'âge et sexe.
+     */
+public function distributionJeunesByAge(): JsonResponse
+{
+    // Récupérer l'ID du rôle "Jeune"
+    $roleId = Role::where('name', 'Jeune')->value('id');
+
+    // Vérifier si le rôle existe
+    if (!$roleId) {
+        return response()->json(['error' => 'Rôle "Jeune" non trouvé'], 404);
+    }
+    // Définir les tranches d'âge
+    $tranches = [
+        '<14' => [0, 14],
+        '15-19' => [15, 19],
+        '20-24' => [20, 24],
+        '25-29' => [25, 29],
+        '30-34' => [30, 34],
+        '35-39' => [35, 39],
+        '40-44' => [40, 44],
+        '>45' => [45, 100],
+    ];
+
+    $distribution = [];
+
+    foreach ($tranches as $tranche => [$minAge, $maxAge]) {
+        // Calculer le nombre d'hommes et de femmes dans chaque tranche d'age au niveau des jeunes
+        $hommes = User::where('role_id', $roleId)
+            ->where('sexe', 'M') // Homme
+            ->whereNotNull("dateNaissance")
+            ->whereRaw('EXTRACT(YEAR FROM AGE("dateNaissance")) BETWEEN ? AND ?', [$minAge, $maxAge])
+            ->count();
+        ;
+        $femmes = User::where('role_id', $roleId)
+            ->where('sexe', 'F') // Femme
+            ->whereNotNull("dateNaissance")
+            ->whereRaw('EXTRACT(YEAR FROM AGE("dateNaissance")) BETWEEN ? AND ?', [$minAge, $maxAge])
+            ->count();
+        ;
+        $distribution[] = [
+            'tranche' => $tranche,
+            'hommes' => $hommes,
+            'femmes' => $femmes,
+        ];
+    }
+    return response()->json($distribution);
+}
 }

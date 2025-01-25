@@ -52,7 +52,7 @@ class SceanceController extends Controller
             // Gestion de l'upload de l'image de couverture
             $couverturePath = null;
             if ($request->hasFile('couverture')) {
-                $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
+                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
             }
 
             // Création de la nouvelle séance
@@ -150,7 +150,7 @@ class SceanceController extends Controller
                     Storage::disk('public')->delete($sceance->couverture);
                 }
                 // Stockage de la nouvelle image
-                $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
+                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
                 $sceance->couverture = $couverturePath;
             }
 
