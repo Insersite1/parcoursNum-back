@@ -90,6 +90,8 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 //Manager
 
 Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
+Route::get('/listejeunes', [ManagerController::class, 'getJeunes'])->middleware('jwt.auth');
+
 
 //Jeune
 

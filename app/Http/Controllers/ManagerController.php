@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateManagerRequest;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class ManagerController extends Controller
@@ -34,7 +35,7 @@ class ManagerController extends Controller
 
     }
 
-    
+
 
     /**
      * Store a newly created resource in storage.
@@ -128,4 +129,54 @@ class ManagerController extends Controller
     {
         //
     }
+
+
+/**
+ * Récupère une liste des jeunes associés à la même structure que le manager.
+ *
+ * Cette fonction vérifie si l'utilisateur connecté est authentifié et possède le rôle de manager.
+ * Elle retourne uniquement les jeunes (utilisateurs ayant le rôle avec `role_id = 2`) appartenant
+ * à la même structure que le manager (basé sur le `structure_id` de l'utilisateur connecté).
+ * En cas d'erreur, des messages explicites sont retournés pour faciliter le débogage.
+ *
+ * @param \Illuminate\Http\Request $request La requête envoyée par le client.
+ *
+ * @return \Illuminate\Http\JsonResponse Une réponse JSON contenant la liste des jeunes ou un message d'erreur.
+ */
+public function getJeunes(Request $request)
+{
+    try {
+        // Récupérer l'utilisateur connecté
+        $currentUser = Auth::user();
+
+        // Vérifier si l'utilisateur est authentifié
+        if (!$currentUser) {
+            return response()->json([
+                'message' => 'Accès interdit. Utilisateur non authentifié.',
+            ], 401);
+        }
+
+        // Vérifier si l'utilisateur est un manager
+        if (!isset($currentUser->role_id) || $currentUser->role_id != 3) {
+            return response()->json([
+                'message' => 'Accès interdit. Seuls les managers peuvent voir cette liste.',
+            ], 403);
+        }
+
+        // Récupérer les jeunes dans la même structure que le manager
+        $jeunes = User::where('role_id', 2)
+                      ->where('structure_id', $currentUser->structure_id) 
+                      ->get();
+
+        // Retourner la liste des jeunes
+        return response()->json(['jeunes' => $jeunes], 200);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la récupération des jeunes.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+
 }
