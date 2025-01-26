@@ -61,6 +61,7 @@ class JeuneController extends Controller
             'email' => 'required|string|email|unique:users',
             'numTelephone' => 'required|string',
             'sexe' => 'required|string',
+            'structure_id' => 'nullable|exists:structures,id',
 
         ]);
 
@@ -85,12 +86,15 @@ class JeuneController extends Controller
         $user->role_id = 2;
         $user->sexe = $validatedData['sexe'];
         $user->confirmation_token = Str::random(60);
-
+        $user->structure_id = $validatedData['structure_id'];
         // Sauvegarde de l'utilisateur
         $user->save();
 
          // Génération du token
-         $token = $user->createToken('UserToken')->plainTextToken;
+        $token = $user->createToken('UserToken')->plainTextToken;
+
+           // Charger les détails de la structure associée
+        $user->load('structure');
 
         // Envoi de l'email à l'utilisateur
         Mail::to($user->email)->send(new JeuneCreatedMail($user));
@@ -153,10 +157,10 @@ class JeuneController extends Controller
     {
         try {
             // Récupérer l'ID de l'utilisateur connecté
-            $userId = Auth::id();  // Récupère l'ID de l'utilisateur authentifié
+            $userId = Auth::id();
 
-            // Vérifier si l'utilisateur a le rôle 'jeune'
-            $user = User::with('role')->where('role_id', 2)->findOrFail($userId);
+            // Vérifier si l'utilisateur a le rôle et structure 'jeune'
+            $user = User::with('role','structure')->where('role_id', 2)->findOrFail($userId);
 
             return response()->json([
                 'message' => 'Utilisateur trouvé avec succès.',

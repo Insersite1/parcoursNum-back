@@ -48,7 +48,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function structure()
 {
-    return $this->belongsTo(Structure::class, 'structure_id');
+    return $this->belongsTo(Structure::class);
 }
 
 public function dispositif()
