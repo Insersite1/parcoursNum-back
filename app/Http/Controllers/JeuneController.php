@@ -50,66 +50,83 @@ class JeuneController extends Controller
  */
 
 
-    public function store(Request $request)
-{
-    try {
-        // Validation des données
-        $validatedData = $request->validate([
-            'avatar' => 'mimes:jpeg,png,jpg,gif',
-            'nom' => 'nullable|string',
-            'Prenom' => 'nullable|string',
-            'email' => 'required|string|email|unique:users',
-            'numTelephone' => 'required|string',
-            'sexe' => 'required|string',
-            'structure_id' => 'nullable|exists:structures,id',
+ public function store(Request $request)
+ {
+     try {
+         // Récupérer l'utilisateur connecté
+         $currentUser = Auth::user();
 
-        ]);
+         // Vérifier si l'utilisateur est authentifié
+         if (!$currentUser) {
+             return response()->json([
+                 'message' => 'Accès interdit. Utilisateur non authentifié.',
+             ], 401);
+         }
 
-        // Création de l'utilisateur
-        $user = new User();
+         // Vérifier si l'utilisateur connecté a le rôle de manager (role_id = 3)
+         if (!isset($currentUser->role_id) || $currentUser->role_id != 3) {
+             return response()->json([
+                 'message' => 'Accès interdit. Seuls les managers peuvent créer des jeunes.',
+             ], 403);
+         }
 
-        // Traitement de l'avatar
-        if ($request->hasFile('avatar')) {
-            $avatar = $request->file('avatar');
-            $avatarName = time() . '.' . $avatar->extension();
-            $avatar->move(public_path('images'), $avatarName);
-            $user->avatar = $avatarName;
-        }
+         // Validation des données
+         $validatedData = $request->validate([
+             'avatar' => 'mimes:jpeg,png,jpg,gif',
+             'nom' => 'nullable|string',
+             'Prenom' => 'nullable|string',
+             'email' => 'required|string|email|unique:users',
+             'numTelephone' => 'required|string',
+             'sexe' => 'required|string',
+         ]);
 
-        // Assignation des valeurs
-        $user->nom = $validatedData['nom'];
-        $user->Prenom = $validatedData['Prenom'];
-        $user->email = $validatedData['email'];
-        $user->numTelephone = $validatedData['numTelephone'];
-        $user->password = bcrypt('passer123');
-        $user->statut = 'Active';
-        $user->role_id = 2;
-        $user->sexe = $validatedData['sexe'];
-        $user->confirmation_token = Str::random(60);
-        $user->structure_id = $validatedData['structure_id'];
-        // Sauvegarde de l'utilisateur
-        $user->save();
+         // Création de l'utilisateur
+         $user = new User();
+
+         // Traitement de l'avatar
+         if ($request->hasFile('avatar')) {
+             $avatar = $request->file('avatar');
+             $avatarName = time() . '.' . $avatar->extension();
+             $avatar->move(public_path('images'), $avatarName);
+             $user->avatar = $avatarName;
+         }
+
+         // Assignation des valeurs
+         $user->nom = $validatedData['nom'];
+         $user->Prenom = $validatedData['Prenom'];
+         $user->email = $validatedData['email'];
+         $user->numTelephone = $validatedData['numTelephone'];
+         $user->password = bcrypt('passer123');
+         $user->statut = 'Active';
+         $user->role_id = 2;
+         $user->sexe = $validatedData['sexe'];
+         $user->confirmation_token = Str::random(60);
+
+         // Associer automatiquement la structure du manager à l'utilisateur
+         $user->structure_id = $currentUser->structure_id;
+
+         // Sauvegarde de l'utilisateur
+         $user->save();
 
          // Génération du token
-        $token = $user->createToken('UserToken')->plainTextToken;
+         $token = $user->createToken('UserToken')->plainTextToken;
 
-           // Charger les détails de la structure associée
-        $user->load('structure');
+         // Charger les détails de la structure associée
+         $user->load('structure');
 
-        // Envoi de l'email à l'utilisateur
-        Mail::to($user->email)->send(new JeuneCreatedMail($user));
+         // Envoi de l'email à l'utilisateur
+         Mail::to($user->email)->send(new JeuneCreatedMail($user));
 
-        // Réponse avec succès
-        return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user,'token' => $token], 201);
+         // Réponse avec succès
+         return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user, 'token' => $token], 201);
 
-    } catch (ValidationException $e) {
+     } catch (ValidationException $e) {
+         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+     } catch (Exception $e) {
+         return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'utilisateur.', 'error' => $e->getMessage()], 500);
+     }
+ }
 
-        return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-    } catch (Exception $e) {
-
-        return response()->json(['message' => 'Une erreur est survenue lors de la création de l\'utilisateur.', 'error' => $e->getMessage()], 500);
-    }
-}
 
 /**
  * Confirme l'inscription de l'utilisateur en vérifiant le token de confirmation.

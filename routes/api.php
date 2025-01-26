@@ -89,11 +89,11 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 
 //Manager
 
-Route::apiResource('/Manager',controller: ManagerController::class);
+Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
 
 //Jeune
 
-Route::apiResource('/Jeune',controller: JeuneController::class);
+Route::apiResource('/Jeune',controller: JeuneController::class)->middleware('jwt.auth');
 
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
