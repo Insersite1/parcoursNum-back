@@ -303,78 +303,50 @@ class JeuneController extends Controller
  *  - Réponse JSON avec un message d'erreur en cas de validation échouée (status 422) ou erreur serveur (status 500).
  */
 
- public function completeProfile(Request $request)
- {
-     try {
-         // Récupérer l'utilisateur connecté
-         $currentUser = Auth::user();
+    public function completeProfile(Request $request)
+    {
+        try {
+            // Récupérer l'utilisateur connecté
+            $currentUser = Auth::user();
 
-         // Vérifier si l'utilisateur est bien connecté
-         if (!$currentUser) {
-             return response()->json(['message' => 'Utilisateur non authentifié.'], 401);
-         }
+            // Vérifier si l'utilisateur est bien connecté et a le rôle approprié
+            if (!$currentUser || $currentUser->role_id != 2) {
+                return response()->json(['message' => 'Accès non autorisé ou utilisateur non authentifié.'], 403);
+            }
 
-         // Vérifier si l'utilisateur a un role_id égal à 2
-         if ($currentUser->role_id != 2) {
-             return response()->json(['message' => 'Vous n\'avez pas les droits nécessaires pour modifier ce profil.'], 403);
-         }
+            // Validation des données supplémentaires
+            $validatedData = $request->validate([
+                'dateNaissance' => 'nullable|date',
+                'Adresse' => 'nullable|string',
+                'ville' => 'nullable|string',
+                'codePostal' => 'nullable|string',
+                'region' => 'nullable|string',
+                'bibiographie' => 'nullable|string',
+                'situation' => 'nullable|string',
+                'etatCivil' => 'nullable|string',
+                'situationTravail' => 'nullable|string',
+                'QP' => 'nullable|boolean',
+                'ZRR' => 'nullable|boolean',
+                'ETH' => 'nullable|boolean',
+                'EPC' => 'nullable|boolean',
+                'API' => 'nullable|boolean',
+                'AE' => 'nullable|boolean',
+                'NumSecuriteSocial' => 'nullable|string',
+            ]);
 
-         // Vérifier si certaines informations essentielles manquent
-         if (!$currentUser->nom || !$currentUser->Prenom || !$currentUser->email || !$currentUser->numTelephone || !$currentUser->sexe || !$currentUser->role_id || !$currentUser->accepter_conditions) {
-             return response()->json(['message' => 'Certains champs obligatoires sont manquants.'], 400);
-         }
+            // Mettre à jour les champs de l'utilisateur existant
+            $currentUser->fill($validatedData);
+            $currentUser->etat = "complet";
+            $currentUser->save();
 
-         // Validation des données supplémentaires
-         $validatedData = $request->validate([
-             'dateNaissance' => 'nullable|date',
-             'Adresse' => 'nullable|string',
-             'ville' => 'nullable|string',
-             'codePostal' => 'nullable|string',
-             'region' => 'nullable|string',
-             'bibiographie' => 'nullable|string',
-             'situation' => 'nullable|string',
-             'etatCivil' => 'nullable|string',
-             'situationTravail' => 'nullable|string',
-             'QP' => 'nullable|boolean',
-             'ZRR' => 'nullable|boolean',
-             'ETH' => 'nullable|boolean',
-             'EPC' => 'nullable|boolean',
-             'API' => 'nullable|boolean',
-             'AE' => 'nullable|boolean',
-             'NumSecuriteSocial' => 'nullable|string',
-         ]);
+            return response()->json(['message' => 'Profil mis à jour avec succès.', 'user' => $currentUser], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
-         // Mettre à jour les champs de l'utilisateur existant
-         $currentUser->dateNaissance = $validatedData['dateNaissance'] ?? $currentUser->dateNaissance;
-         $currentUser->Adresse = $validatedData['Adresse'] ?? $currentUser->Adresse;
-         $currentUser->ville = $validatedData['ville'] ?? $currentUser->ville;
-         $currentUser->codePostal = $validatedData['codePostal'] ?? $currentUser->codePostal;
-         $currentUser->region = $validatedData['region'] ?? $currentUser->region;
-         $currentUser->bibiographie = $validatedData['bibiographie'] ?? $currentUser->bibiographie;
-         $currentUser->situation = $validatedData['situation'] ?? $currentUser->situation;
-         $currentUser->etatCivil = $validatedData['etatCivil'] ?? $currentUser->etatCivil;
-         $currentUser->situationTravail = $validatedData['situationTravail'] ?? $currentUser->situationTravail;
-         $currentUser->QP = $validatedData['QP'] ?? $currentUser->QP;
-         $currentUser->ZRR = $validatedData['ZRR'] ?? $currentUser->ZRR;
-         $currentUser->ETH = $validatedData['ETH'] ?? $currentUser->ETH;
-         $currentUser->EPC = $validatedData['EPC'] ?? $currentUser->EPC;
-         $currentUser->API = $validatedData['API'] ?? $currentUser->API;
-         $currentUser->AE = $validatedData['AE'] ?? $currentUser->AE;
-         $currentUser->NumSecuriteSocial = $validatedData['NumSecuriteSocial'] ?? $currentUser->NumSecuriteSocial;
-
-
-         $currentUser->save();
-
-
-         return response()->json(['message' => 'Profil mis à jour avec succès.', 'user' => $currentUser], 200);
-     } catch (\Illuminate\Validation\ValidationException $e) {
-
-         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-     } catch (Exception $e) {
-
-         return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
-     }
- }
 
 
 
