@@ -9,6 +9,8 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Sceance;
+
 
 
 class ManagerController extends Controller
@@ -165,7 +167,7 @@ public function getJeunes(Request $request)
 
         // Récupérer les jeunes dans la même structure que le manager
         $jeunes = User::where('role_id', 2)
-                      ->where('structure_id', $currentUser->structure_id) 
+                      ->where('structure_id', $currentUser->structure_id)
                       ->get();
 
         // Retourner la liste des jeunes
@@ -177,6 +179,63 @@ public function getJeunes(Request $request)
         ], 500);
     }
 }
+
+
+
+ /**
+ * Associe un jeune à une séance spécifique.
+ *
+ * Cette fonction valide les données envoyées dans la requête, récupère le jeune spécifié par
+ * son `id`, et vérifie qu'il possède bien le rôle de "jeune" (`role = 'jeune'`). Ensuite,
+ * elle récupère la séance spécifiée par son `sceance_id` et lie le jeune à cette séance
+ * via la relation définie dans la table pivot.
+ * Si le jeune n'est pas trouvé ou n'a pas le bon rôle, une erreur 403 est renvoyée.
+ * En cas de succès, un message confirmant l'association du jeune à la séance est retourné.
+ *
+ * @param \Illuminate\Http\Request $request La requête envoyée par le client contenant l'ID du jeune et de la séance à associer.
+ *
+ * @return \Illuminate\Http\JsonResponse Une réponse JSON avec le message de succès ou d'erreur.
+ */
+
+ public function assignJeuneToSceance(Request $request)
+ {
+     try {
+         // Validation des données
+         $request->validate([
+             'user_id' => 'required|exists:users,id',
+             'sceance_id' => 'required|exists:sceances,id',
+         ]);
+
+         // Recherche un utilisateur dont l'ID correspond à celui de la requête et qui possède le rôle "jeune"
+        //  $jeune = User::where('id', $request->user_id)->where('role', 'jeune')->first();
+        $jeune = User::where('id', $request->user_id)->where('role_id', 2)->first();
+
+
+         // Vérification si l'utilisateur est bien un jeune
+         if (!$jeune) {
+             return response()->json(['message' => 'L\'utilisateur spécifié n\'est pas un jeune.'], 403);
+         }
+
+         // Récupération de la séance spécifiée
+         $sceance = Sceance::findOrFail($request->sceance_id);
+
+         // Lier le jeune à la séance via la relation définie dans la table pivot
+         $sceance->jeunes()->attach($jeune->id);
+
+         // Retourner un message de succès
+         return response()->json(['message' => 'Jeune assigné à la séance avec succès.']);
+     } catch (Exception $e) {
+         // Gestion des erreurs et retour d'un message d'erreur détaillé
+         return response()->json([
+             'message' => 'Une erreur est survenue lors de l\'assignation du jeune à la séance.',
+             'error' => $e->getMessage(),
+         ], 500);
+     }
+ }
+
+
+
+
 
 
 }

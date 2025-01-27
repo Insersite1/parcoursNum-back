@@ -76,6 +76,12 @@ public function dispositif()
         return $this->hasMany(Action::class,'session_id');
     }
 
+    public function sceances()
+    {
+        return $this->belongsToMany(Sceance::class, 'jeune_sceance');
+    }
+
+
     public function getAvatarUrlAttribute()
 {
     return $this->avatar ? asset('storage/' . $this->avatar) : null;

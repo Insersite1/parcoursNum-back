@@ -14,4 +14,12 @@ class Sceance extends Model
     {
         return $this->belongsTo(Session::class,'session_id');
     }
+
+
+
+public function jeunes()
+{
+    return $this->belongsToMany(User::class, 'jeune_sceance', 'sceance_id', 'user_id');
+}
+
 }
