@@ -199,55 +199,6 @@ class JeuneController extends Controller
 
 
 
-//     public function update(Request $request, $id)
-// {
-//     try {
-
-//         $validatedData = $request->validate([
-//             'avatar' => 'nullable|mimes:jpeg,png,jpg,gif',
-//             'nom' => 'nullable|string',
-//             'Prenom' => 'nullable|string',
-//             'email' => 'required|string|email|unique:users,email,' . $id,
-//             'numTelephone' => 'required|string',
-//             'role_id' => 'exists:roles,id',
-//             'sexe' => 'required|string',
-//         ]);
-
-//         $user = User::findOrFail($id);
-
-
-//         if ($request->hasFile('avatar')) {
-
-//             if ($user->avatar) {
-//                 unlink(public_path('images') . '/' . $user->avatar);
-//             }
-//             $avatar = $request->file('avatar');
-//             $avatarName = time() . '.' . $avatar->extension();
-//             $avatar->move(public_path('images'), $avatarName);
-//             $user->avatar = $avatarName;
-//         }
-
-//         $user->nom = $validatedData['nom'] ?? $user->nom;
-//         $user->Prenom = $validatedData['Prenom'] ?? $user->Prenom;
-//         $user->email = $validatedData['email'];
-//         $user->numTelephone = $validatedData['numTelephone'];
-//         $user->role_id = $validatedData['role_id'] ?? $user->role_id;
-//         $user->sexe = $validatedData['sexe'];
-//         $user->save();
-
-
-//         return response()->json(['message' => 'Utilisateur mis à jour avec succès.', 'user' => $user]);
-
-//     } catch (\Illuminate\Validation\ValidationException $e) {
-
-//         return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-//     } catch (Exception $e) {
-
-//         return response()->json(['message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.', 'error' => $e->getMessage()], 500);
-//     }
-// }
-
-
 /**
  * Supprime un utilisateur par son ID.
  *
