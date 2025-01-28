@@ -20,4 +20,6 @@ class Session extends Model
     {
         return $this->belongsTo(Action::class,'action_id');
     }
+
+    
 }

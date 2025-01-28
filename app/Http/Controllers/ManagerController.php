@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Sceance;
-
+use Illuminate\Support\Facades\DB;
 
 
 class ManagerController extends Controller
@@ -197,41 +197,92 @@ public function getJeunes(Request $request)
  * @return \Illuminate\Http\JsonResponse Une réponse JSON avec le message de succès ou d'erreur.
  */
 
+
  public function assignJeuneToSceance(Request $request)
  {
+     // Validation des données d'entrée
+     $validated = $request->validate([
+         'user_id' => 'required|exists:users,id',
+         'sceance_id' => 'required|exists:sceances,id',
+     ]);
+
+     DB::beginTransaction();
+
      try {
-         // Validation des données
-         $request->validate([
-             'user_id' => 'required|exists:users,id',
-             'sceance_id' => 'required|exists:sceances,id',
-         ]);
-
-         // Recherche un utilisateur dont l'ID correspond à celui de la requête et qui possède le rôle "jeune"
-        //  $jeune = User::where('id', $request->user_id)->where('role', 'jeune')->first();
-        $jeune = User::where('id', $request->user_id)->where('role_id', 2)->first();
-
-
-         // Vérification si l'utilisateur est bien un jeune
-         if (!$jeune) {
-             return response()->json(['message' => 'L\'utilisateur spécifié n\'est pas un jeune.'], 403);
+         // Récupérer le jeune et vérifier son rôle
+         $jeune = User::find($validated['user_id']);
+         if ($jeune->role_id !== 2) {
+             return response()->json(['message' => 'Seuls les utilisateurs avec un rôle "jeune" peuvent être assignés à une séance.'], 403);
          }
 
-         // Récupération de la séance spécifiée
-         $sceance = Sceance::findOrFail($request->sceance_id);
+         // Récupérer la séance
+         $sceance = Sceance::find($validated['sceance_id']);
 
-         // Lier le jeune à la séance via la relation définie dans la table pivot
+         // Vérifier si le jeune est déjà assigné à cette séance
+         if ($sceance->jeunes()->where('user_id', $jeune->id)->exists()) {
+             return response()->json(['message' => 'Le jeune est déjà assigné à cette séance.'], 200);
+         }
+
+         // Assigner le jeune à la séance
          $sceance->jeunes()->attach($jeune->id);
 
-         // Retourner un message de succès
-         return response()->json(['message' => 'Jeune assigné à la séance avec succès.']);
-     } catch (Exception $e) {
-         // Gestion des erreurs et retour d'un message d'erreur détaillé
+         // Récupérer la session associée à la séance
+         $session = $sceance->session;
+
+         if (!$session) {
+             return response()->json(['message' => 'La séance n\'est associée à aucune session.'], 400);
+         }
+
+         // Récupérer l'action associée à la session
+         $action = $session->action;
+
+         if (!$action) {
+             return response()->json(['message' => 'Aucune action associée à cette session.'], 400);
+         }
+
+         // Récupérer le StructureDispositif associé à l'action
+         $structureDispositif = $action->structureDispositif;
+
+         if (!$structureDispositif) {
+             return response()->json(['message' => 'Aucune structure-dispositif associée à cette action.'], 400);
+         }
+
+         // Récupérer le dispositif associé via StructureDispositif
+         $dispositif = $structureDispositif->dispositif;
+
+         if (!$dispositif) {
+             return response()->json(['message' => 'Aucun dispositif associé à cette structure-dispositif.'], 400);
+         }
+
+         // Associer le dispositif uniquement si l'utilisateur est un jeune
+         $jeune->dispositif_id = $dispositif->id;
+         $jeune->save();
+
+         // Valider la transaction
+         DB::commit();
+
+         // Réponse avec succès
          return response()->json([
-             'message' => 'Une erreur est survenue lors de l\'assignation du jeune à la séance.',
+             'message' => 'Le jeune a été assigné à la séance avec succès.',
+             'dispositif' => $dispositif,
+         ], 200);
+     } catch (Exception $e) {
+         // Annuler la transaction en cas d'erreur
+         DB::rollBack();
+
+         return response()->json([
+             'message' => 'Une erreur est survenue lors de l\'assignation.',
              'error' => $e->getMessage(),
          ], 500);
      }
  }
+
+
+
+
+
+
+
 
 
 

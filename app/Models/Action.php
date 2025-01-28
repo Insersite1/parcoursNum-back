@@ -14,7 +14,7 @@ class Action extends Model
         'place',
         'couverture',
         'user_id',
-        'structureDispositif_id',
+        'structure_dispositif_id',
         'date_debut',
         'type',
         'couleur',
@@ -23,13 +23,6 @@ class Action extends Model
         'auteur'
         ];
 
-    /**
-     * Relation avec le modèle StructureDispositif
-     */
-    public function structureDispositif()
-    {
-        return $this->belongsTo(StructureDispositif::class, 'structureDispositif_id');
-    }
 
     /**
      * Relation avec le modèle User
@@ -49,4 +42,19 @@ class Action extends Model
     {
         return $this->belongsToMany(User::class, 'action_user', 'action_id', 'user_id');
     }
+
+        public function dispositif()
+    {
+        return $this->belongsTo(Dispositif::class);
+    }
+
+     /**
+     * Relation avec le modèle StructureDispositif
+     */
+
+    public function structureDispositif()
+    {
+        return $this->belongsTo(StructureDispositif::class, 'structure_dispositif_id');
+    }
+
 }
