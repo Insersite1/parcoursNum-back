@@ -95,11 +95,14 @@ Route::get('structures/{structureId}/dispositifs', [StructureController::class, 
 
 //Manager
 
-Route::apiResource('/Manager',controller: ManagerController::class);
+Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
+Route::get('/listejeunes', [ManagerController::class, 'getJeunes'])->middleware('jwt.auth');
+Route::post('/sceances/assign-jeune', [ManagerController::class, 'assignJeuneToSceance']);
 
 //Jeune
 
-Route::apiResource('/Jeune',controller: JeuneController::class);
+Route::apiResource('/Jeune',controller: JeuneController::class)->middleware('jwt.auth');
+
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
 Route::get('/apercu/{id}', [JeuneController::class, 'getJeuneUserStatistics']);

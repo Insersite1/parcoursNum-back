@@ -58,12 +58,12 @@ class SceanceController extends Controller
             // Création de la nouvelle séance
             $sceance = new Sceance();
             $sceance->nom = $request->nom;
-            $sceance->par = $request->par;; // Vous pouvez remplacer cette valeur par une logique dynamique
+            $sceance->par = $request->par;; 
             $sceance->session_code = $request->session_code;
             $sceance->description = $request->description;
             $sceance->date_debut = $request->date_debut;
             $sceance->date_fin = $request->date_fin;
-            $sceance->session_id = $request->session_id; // Association à une session existante
+            $sceance->session_id = $request->session_id;
             $sceance->couverture = $couverturePath;
 
             $sceance->save();

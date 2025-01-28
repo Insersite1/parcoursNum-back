@@ -48,7 +48,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function structure()
 {
-    return $this->belongsTo(Structure::class, 'structure_id');
+    return $this->belongsTo(Structure::class);
 }
 
 public function dispositif()
@@ -79,6 +79,12 @@ public function dispositif()
     {
         return $this->hasMany(Action::class,'session_id');
     }
+
+    public function sceances()
+    {
+        return $this->belongsToMany(Sceance::class, 'jeune_sceance');
+    }
+
 
     public function getAvatarUrlAttribute()
     {
