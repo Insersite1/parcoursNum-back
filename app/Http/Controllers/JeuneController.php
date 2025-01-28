@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -64,7 +65,7 @@ class JeuneController extends Controller
          }
 
          // Vérifier si l'utilisateur connecté a le rôle de manager (role_id = 3)
-         if (!isset($currentUser->role_id) || $currentUser->role_id != 3) {
+         if (!isset($currentUser->role_id) || $currentUser->role == "manager") {
              return response()->json([
                  'message' => 'Accès interdit. Seuls les managers peuvent créer des jeunes.',
              ], 403);
@@ -310,34 +311,42 @@ class JeuneController extends Controller
             $currentUser = Auth::user();
 
             // Vérifier si l'utilisateur est bien connecté et a le rôle approprié
-            if (!$currentUser || $currentUser->role_id != 2) {
+            if (!$currentUser || $currentUser->role == "jeune") {
                 return response()->json(['message' => 'Accès non autorisé ou utilisateur non authentifié.'], 403);
             }
 
             // Validation des données supplémentaires
             $validatedData = $request->validate([
-                'dateNaissance' => 'nullable|date',
-                'Adresse' => 'nullable|string',
-                'ville' => 'nullable|string',
-                'codePostal' => 'nullable|string',
-                'region' => 'nullable|string',
-                'bibiographie' => 'nullable|string',
-                'situation' => 'nullable|string',
-                'etatCivil' => 'nullable|string',
-                'situationTravail' => 'nullable|string',
+                'dateNaissance' => 'required|date',
+                'Adresse' => 'required|string',
+                'ville' => 'required|string',
+                'codePostal' => 'required|string',
+                'region' => 'required|string',
+                'bibiographie' => 'required|string',
+                'etatCivil' => 'required|string',
+                'situationTravail' => 'required|string',
                 'QP' => 'nullable|boolean',
                 'ZRR' => 'nullable|boolean',
                 'ETH' => 'nullable|boolean',
                 'EPC' => 'nullable|boolean',
                 'API' => 'nullable|boolean',
                 'AE' => 'nullable|boolean',
-                'NumSecuriteSocial' => 'nullable|string',
+                'NumSecuriteSocial' => 'required|string',
             ]);
-
+            // Mise à jour des cases à cocher (par défaut `false` si non envoyé)
+            $currentUser->QP = $validatedData['QP'] ?? false;
+            $currentUser->ZRR = $validatedData['ZRR'] ?? false;
+            $currentUser->ETH = $validatedData['ETH'] ?? false;
+            $currentUser->EPC = $validatedData['EPC'] ?? false;
+            $currentUser->API = $validatedData['API'] ?? false;
+            $currentUser->AE = $validatedData['AE'] ?? false;
+            Log::info('Data to be saved: ', $validatedData);
             // Mettre à jour les champs de l'utilisateur existant
             $currentUser->fill($validatedData);
             $currentUser->etat = "complet";
             $currentUser->save();
+            Log::info($request->all());  // Cela affiche toutes les données envoyées dans la requête
+
 
             return response()->json(['message' => 'Profil mis à jour avec succès.', 'user' => $currentUser], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
