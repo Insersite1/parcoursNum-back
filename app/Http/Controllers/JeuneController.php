@@ -65,7 +65,7 @@ class JeuneController extends Controller
          }
 
          // Vérifier si l'utilisateur connecté a le rôle de manager (role_id = 3)
-         if (!isset($currentUser->role_id) || $currentUser->role == "manager") {
+         if (!isset($currentUser->role_id) || $currentUser->role -> name != "manager") {
              return response()->json([
                  'message' => 'Accès interdit. Seuls les managers peuvent créer des jeunes.',
              ], 403);
@@ -99,7 +99,14 @@ class JeuneController extends Controller
          $user->numTelephone = $validatedData['numTelephone'];
          $user->password = bcrypt('passer123');
          $user->statut = 'Active';
-         $user->role_id = 2;
+         // Attribuer dynamiquement l'ID du rôle "jeune"
+         $roleJeune = Role::where('name', 'jeune')->first();
+         if ($roleJeune) {
+             $user->role_id = $roleJeune->id;
+         } else {
+             return response()->json(['message' => 'Rôle "jeune" non trouvé.'], 500);
+         }
+
          $user->sexe = $validatedData['sexe'];
          $user->confirmation_token = Str::random(60);
 
@@ -311,7 +318,7 @@ class JeuneController extends Controller
             $currentUser = Auth::user();
 
             // Vérifier si l'utilisateur est bien connecté et a le rôle approprié
-            if (!$currentUser || $currentUser->role == "jeune") {
+            if (!$currentUser || $currentUser->role->name == "jeune") {
                 return response()->json(['message' => 'Accès non autorisé ou utilisateur non authentifié.'], 403);
             }
 

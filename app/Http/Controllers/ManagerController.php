@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Manager;
 use App\Http\Requests\StoreManagerRequest;
 use App\Http\Requests\UpdateManagerRequest;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -145,40 +146,40 @@ class ManagerController extends Controller
  *
  * @return \Illuminate\Http\JsonResponse Une réponse JSON contenant la liste des jeunes ou un message d'erreur.
  */
-public function getJeunes(Request $request)
-{
-    try {
-        // Récupérer l'utilisateur connecté
-        $currentUser = Auth::user();
+    public function getJeunesByManager(Request $request)
+    {
+        try {
+            // Récupérer l'utilisateur connecté
+            $currentUser = Auth::user();
 
-        // Vérifier si l'utilisateur est authentifié
-        if (!$currentUser) {
+            // Vérifier si l'utilisateur est authentifié et est un manager
+            if (!$currentUser || $currentUser->role->name != 'manager') {
+                return response()->json([
+                    'message' => 'Accès interdit. Seuls les managers peuvent voir cette liste.',
+                ], 403);
+            }
+
+            // Récupérer dynamiquement l'ID du rôle "jeune"
+            $roleJeune = Role::where('name', 'jeune')->first();
+            if (!$roleJeune) {
+                return response()->json(['message' => 'Le rôle "jeune" est introuvable.'], 500);
+            }
+
+            // Récupérer les jeunes dans la même structure que le manager
+            $jeunes = User::where('role_id', $roleJeune->id)
+                ->where('structure_id', $currentUser->structure_id)
+                ->get();
+
+            // Retourner la liste des jeunes
+            return response()->json(['jeunes' => $jeunes], 200);
+        } catch (Exception $e) {
             return response()->json([
-                'message' => 'Accès interdit. Utilisateur non authentifié.',
-            ], 401);
+                'message' => 'Une erreur est survenue lors de la récupération des jeunes.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Vérifier si l'utilisateur est un manager
-        if (!isset($currentUser->role_id) || $currentUser->role_id != 3) {
-            return response()->json([
-                'message' => 'Accès interdit. Seuls les managers peuvent voir cette liste.',
-            ], 403);
-        }
-
-        // Récupérer les jeunes dans la même structure que le manager
-        $jeunes = User::where('role_id', 2)
-                      ->where('structure_id', $currentUser->structure_id)
-                      ->get();
-
-        // Retourner la liste des jeunes
-        return response()->json(['jeunes' => $jeunes], 200);
-    } catch (Exception $e) {
-        return response()->json([
-            'message' => 'Une erreur est survenue lors de la récupération des jeunes.',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
+
 
 
 
