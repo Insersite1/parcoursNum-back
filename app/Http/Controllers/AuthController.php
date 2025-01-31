@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -111,6 +112,22 @@ class AuthController extends Controller
             'status' => 'true',
             'message' => 'Logged out successfully',
             'token' => null
+        ]);
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        return response()->json([
+            'prenom' => $user->Prenom,
+            'nom' => $user->nom,
+            'photo' => $user->avatar,
+            'role' => $user->role,
         ]);
     }
 }
