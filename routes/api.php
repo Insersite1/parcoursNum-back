@@ -11,6 +11,7 @@ use App\Http\Controllers\SceanceController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\SondageController;
 use App\Http\Controllers\ReponseController;
+use App\Http\Controllers\RoleController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableauBordController;
@@ -114,6 +115,8 @@ Route::get('/jeune/profile', [JeuneController::class, 'show'])->middleware('jwt.
 Route::middleware('jwt.auth')->post('/jeune/complete-profile', [JeuneController::class, 'completeProfile']);
 
 Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
+
+Route::get('/role/{name}', [RoleController::class, 'getRoleByName']);
 
 
 //Référent
