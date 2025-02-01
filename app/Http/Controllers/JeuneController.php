@@ -318,7 +318,7 @@ class JeuneController extends Controller
             $currentUser = Auth::user();
 
             // Vérifier si l'utilisateur est bien connecté et a le rôle approprié
-            if (!$currentUser || $currentUser->role->name == "jeune") {
+            if (!$currentUser || $currentUser->role->name != "jeune") {
                 return response()->json(['message' => 'Accès non autorisé ou utilisateur non authentifié.'], 403);
             }
 

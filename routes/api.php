@@ -150,6 +150,8 @@ Route::post('/login',[AuthController::class,'login']);
 Route::post('/register',[AuthController::class,'register']);
 Route::middleware('auth:api')->group(function () {
     Route::get('/user-profile', [AuthController::class, 'profile']);
+    Route::post('/logout',[AuthController::class,'logout'])->name('logout');
+
 });
 
 
