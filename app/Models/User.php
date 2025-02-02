@@ -93,10 +93,6 @@ public function dispositif()
     {
     return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
-    public function sceances()
-    {
-        return $this->hasMany(Sceance::class, 'user_id');
-    }
 
 
 
