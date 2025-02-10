@@ -37,17 +37,20 @@ class StructureController extends Controller
             'nomcomplet' => 'required|string|max:255',
             'dateExpire' => 'required|date',
             'statut' => 'required|in:Active,Inactive',
-            'couverture' => 'nullable|mimes:jpg,jpeg,png,gif',
+            'couverture' => 'nullable|mimes:jpeg,png,jpg,gif',
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
         $avatarName = null;
+        $structure=new Structure();
         if ($request->hasFile('couverture')) {
             $couverture = $request->file('couverture');
             $avatarName = time() . '.' . $couverture->extension();
             $couverture->move(public_path('images'), $avatarName);
+             $structure->couverture = $avatarName;
         }
+
         $structure = Structure::create([
             'nomcomplet' => $request->nomcomplet,
             'dateExpire' => $request->dateExpire,
@@ -75,6 +78,34 @@ class StructureController extends Controller
 
         return response()->json($structure, 200);
     }
+
+    public function changeStatus(Request $request, $id)
+    {
+        // Valider le statut fourni
+        $validated = $request->validate([
+            'statut' => 'required|in:Active,Inactive', // Assure que le statut est soit "Active" soit "Inactive"
+        ]);
+
+        // Trouver la structure par son ID
+        $structure = Structure::find($id);
+
+        if (!$structure) {
+            return response()->json(['message' => 'Structure non trouvée.'], 404);
+        }
+
+        // Mettre à jour le statut
+        $structure->statut = $validated['statut'];
+        $structure->save();
+
+        return response()->json([
+            'message' => 'Statut de la structure mis à jour avec succès.',
+            'structure' => $structure,
+        ], 200);
+    }
+
+
+
+
 
     /**
      * Description: Ajouter un dispositif à une structure.

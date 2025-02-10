@@ -50,38 +50,130 @@ class SessionController extends Controller
         return response()->json($session->load('action'));
     }
 
+    // // Met à jour une session
+    // public function update(Request $request, Session $session)
+    // {
+    //     $validatedData = $request->validate([
+    //         'nom' => 'sometimes|required|string|max:255',
+    //         'description' => 'sometimes|required|string',
+    //         'image' => 'nullable|image|max:2048',
+    //         'date_debut' => 'sometimes|required|date',
+    //         'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
+    //         'file' => 'nullable|file|max:2048',
+    //         'par' => 'sometimes|required|string|max:255',
+    //         'action_id' => 'nullable|exists:actions,id',
+    //     ]);
+
+    //     // Gestion de l'image
+    //     if ($request->hasFile('image')) {
+    //         if ($session->image) {
+    //             Storage::disk('public')->delete($session->image);
+    //         }
+    //         $validatedData['image'] = $request->file('image')->store('images', 'public');
+    //     }
+    //     if ($request->hasFile('file')) {
+    //         if ($session->file) {
+    //             Storage::disk('public')->delete($session->file);
+    //         }
+    //         $validatedData['file'] = $request->file('file')->store('files', 'public');
+    //     }
+
+    //     $session->update($validatedData);
+
+    //     return response()->json($session);
+    // }
+
     // Met à jour une session
     public function update(Request $request, Session $session)
     {
         $validatedData = $request->validate([
             'nom' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048', // Image est optionnelle
             'date_debut' => 'sometimes|required|date',
             'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
-            'file' => 'nullable|file|max:2048',
+            'file' => 'nullable|file|max:2048', // Fichier est optionnel
             'par' => 'sometimes|required|string|max:255',
             'action_id' => 'nullable|exists:actions,id',
         ]);
 
-        // Gestion de l'image
+        // Gestion de l'image (uniquement si une nouvelle image est fournie)
         if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image si elle existe
             if ($session->image) {
                 Storage::disk('public')->delete($session->image);
             }
+            // Sauvegarder la nouvelle image
             $validatedData['image'] = $request->file('image')->store('images', 'public');
+        } else {
+            // Si aucune nouvelle image n'est fournie, on conserve l'ancienne
+            unset($validatedData['image']);
         }
+
+        // Gestion du fichier (uniquement si un nouveau fichier est fourni)
         if ($request->hasFile('file')) {
+            // Supprimer l'ancien fichier si il existe
             if ($session->file) {
                 Storage::disk('public')->delete($session->file);
             }
+            // Sauvegarder le nouveau fichier
             $validatedData['file'] = $request->file('file')->store('files', 'public');
+        } else {
+            // Si aucun nouveau fichier n'est fourni, on conserve l'ancien
+            unset($validatedData['file']);
         }
 
+        // Mise à jour de la session avec les données validées
         $session->update($validatedData);
 
         return response()->json($session);
     }
+
+    // Met à jour les upload une session
+    // avec la methode post
+    public function uploadFile(Request $request, Session $session)
+    {
+        // Validation des fichiers
+        $validatedData = $request->validate([
+            'image' => 'nullable|image|max:2048', // Validation pour les images
+            'file' => 'nullable|file|max:2048',  // Validation pour d'autres fichiers
+        ]);
+
+        // Sauvegarde de l'image si elle est fournie
+        if ($request->hasFile('image')) {
+            $previousImage = $session->image;
+
+            // Supprimer l'ancienne image si elle existe
+            if ($previousImage) {
+                Storage::disk('public')->delete($previousImage);
+            }
+
+            // Sauvegarder la nouvelle image
+            $validatedData['image'] = $request->file('image')->store('images', 'public');
+        }
+
+        // Sauvegarde du fichier si fourni
+        if ($request->hasFile('file')) {
+            $previousFile = $session->file;
+
+            // Supprimer l'ancien fichier si existant
+            if ($previousFile) {
+                Storage::disk('public')->delete($previousFile);
+            }
+
+            // Sauvegarder le nouveau fichier
+            $validatedData['file'] = $request->file('file')->store('files', 'public');
+        }
+
+        // Mise à jour de la session avec les nouveaux fichiers
+        $session->update($validatedData);
+
+        return response()->json([
+            'message' => 'Fichiers mis à jour avec succès',
+            'session' => $session,
+        ]);
+    }
+
 
     // Supprime une session
     public function destroy(Session $session)

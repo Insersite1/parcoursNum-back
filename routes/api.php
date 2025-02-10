@@ -26,6 +26,18 @@ use App\Http\Controllers\TableauBordController;
 |
 */
 
+
+//sceance
+Route::apiResource('sceances', SceanceController::class);
+
+//session
+ Route::apiResource('sessions', SessionController::class);
+
+ Route::post('sessions/{session}/upload', [SessionController::class, 'uploadFile']);
+// Route de recherche de session
+ //Route::get('sessions/search', [SessionController::class, 'search']);
+ Route::get('sessions/find/{search}', [SessionController::class, 'search']);
+
 /////Midellware//////
 
 Route::middleware(['super_admin'])->group(function () {
@@ -60,6 +72,7 @@ Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 /// Action
 
+Route::apiResource('/Jeune',controller: \App\Http\Controllers\UserController::class);
 Route::apiResource('/actions', controller: \App\Http\Controllers\ActionController::class);
 
 
@@ -89,23 +102,36 @@ Route::post('/structures/{structure}/add-dispositif', [StructureController::clas
 Route::get('structures/{structureId}/dispositifs', [StructureController::class, 'getDispositifsForStructure']);
 
 //Manager
-Route::apiResource('/Manager',controller: ManagerController::class);
+Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
+Route::get('/listejeunes', [ManagerController::class, 'getJeunes'])->middleware('jwt.auth');
+Route::post('/sceances/assign-jeune', [ManagerController::class, 'assignJeuneToSceance']);
 
 //Jeune
 
-Route::apiResource('/Jeune',controller: JeuneController::class);
+Route::apiResource('/Jeune',controller: JeuneController::class)->middleware('jwt.auth');
+
 Route::post('confirm-inscription', [JeuneController::class, 'confirmInscription'])->name('confirmInscription');
 Route::get('Jeune/{id}/role', [JeuneController::class,'getRoleByUserId']);
 Route::get('/apercu/{id}', [JeuneController::class, 'getJeuneUserStatistics']);
 
 //Modifier mot passe du jeune avec jwt
-Route::middleware('jwt.auth')->post('/jeune/update-password', [JeuneController::class, 'updatePassword']);
+Route::post('/jeune/update-password', [JeuneController::class, 'updatePassword']);
+Route::get('/jeune/profile', [JeuneController::class, 'show'])->middleware('jwt.auth');
+
 Route::middleware('jwt.auth')->post('/jeune/complete-profile', [JeuneController::class, 'completeProfile']);
 Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 
 
 //Référent
 Route::apiResource('referants', controller: \App\Http\Controllers\ReferantController::class);
+Route::get('/destroyreferent/{id}', [\App\Http\Controllers\ReferantController::class,'destroyreferent']);
+Route::put('/updatesref/{id}',[\App\Http\Controllers\ReferantController::class,'updatesref']);
+Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
+
+
+// Route::put('/updatereferants/{id}',[\App\Http\Controllers\ReferantController::class,'updatereferants'])->name('updateAgent');
+
+
 Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
 
 

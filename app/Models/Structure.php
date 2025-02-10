@@ -12,7 +12,7 @@ class Structure extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class, 'structure_id');
+        return $this->hasMany(User::class);
     }
 
 

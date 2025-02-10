@@ -16,8 +16,9 @@ class Dispositif extends Model
         return $this->belongsToMany(Structure::class, 'structure_dispositifs');
     }
 
-    public function user()
+    public function jeunes()
     {
-        return $this->hasMany(User::class,'user_id');
+        return $this->hasMany(User::class,'dispositif_id');
     }
+
 }
