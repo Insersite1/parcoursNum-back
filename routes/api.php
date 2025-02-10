@@ -41,6 +41,7 @@ Route::apiResource('sceances', SceanceController::class);
 
 /////Midellware//////
 
+
 Route::middleware(['super_admin'])->group(function () {
     // Routes accessibles uniquement par le super_admin
 });
@@ -58,10 +59,18 @@ Route::middleware(['jeune'])->group(function () {
 });
 
 
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+//sceance
+Route::apiResource('sceances', SceanceController::class);
+//session
+Route::apiResource('sessions', SessionController::class);
+// Route de recherche de session
+Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 //sceance
 Route::apiResource('sceances', SceanceController::class);
@@ -103,7 +112,6 @@ Route::post('/structures/{structure}/add-dispositif', [StructureController::clas
 Route::get('structures/{structureId}/dispositifs', [StructureController::class, 'getDispositifsForStructure']);
 
 //Manager
-
 Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
 Route::get('/listejeunes', [ManagerController::class, 'getJeunesByManager'])->middleware('jwt.auth');
 Route::post('/sceances/assign-jeune', [ManagerController::class, 'assignJeuneToSceance']);
@@ -140,9 +148,11 @@ Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantControlle
 
 
 // Tableau de bord
+// Tableau de bord
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
+Route::get('/distributionJeunesByAge', [TableauBordController::class, 'distributionJeunesByAge']);
 Route::get('/distributionJeunesByAge', [TableauBordController::class, 'distributionJeunesByAge']);
 Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
 Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
@@ -168,3 +178,4 @@ Route::patch('/sondages/{id}/change-status', [SondageController::class, 'changeS
 // Routes Réponses
 Route::apiResource('reponses', ReponseController::class);
 Route::get('sondages/{sondage}/reponses', [ReponseController::class, 'getReponsesSondage']);
+
