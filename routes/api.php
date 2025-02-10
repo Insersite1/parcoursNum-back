@@ -40,6 +40,7 @@ Route::apiResource('sceances', SceanceController::class);
  Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 /////Midellware//////
+
 Route::middleware(['super_admin'])->group(function () {
     // Routes accessibles uniquement par le super_admin
 });
@@ -56,10 +57,18 @@ Route::middleware(['jeune'])->group(function () {
     // Routes accessibles aux jeunes
 });
 
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+//sceance
+Route::apiResource('sceances', SceanceController::class);
+//session
+Route::apiResource('sessions', SessionController::class);
+// Route de recherche de session
+Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 
 /// Action
@@ -93,7 +102,6 @@ Route::post('/structures/{structure}/add-dispositif', [StructureController::clas
 
 Route::get('structures/{structureId}/dispositifs', [StructureController::class, 'getDispositifsForStructure']);
 
-
 //Manager
 
 Route::apiResource('/Manager',controller: ManagerController::class)->middleware('jwt.auth');
@@ -113,7 +121,6 @@ Route::post('/jeune/update-password', [JeuneController::class, 'updatePassword']
 Route::get('/jeune/profile', [JeuneController::class, 'show'])->middleware('jwt.auth');
 
 Route::middleware('jwt.auth')->post('/jeune/complete-profile', [JeuneController::class, 'completeProfile']);
-
 Route::put('/users/{id}', [JeuneController::class, 'updateJeuneComplet']);
 
 Route::get('/role/{name}', [RoleController::class, 'getRoleByName']);
@@ -132,23 +139,17 @@ Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantControlle
 Route::put('/updatereferantsetat/{id}', [\App\Http\Controllers\ReferantController::class,'updatereferantsetat']);
 
 
-
-
-//Dashboard
-/*Route::get('/youth-statistics', [TableauBordController::class, 'getYoungUserStatistics']);*/
-
-
-//Dashbor
+// Tableau de bord
 
 Route::get('/user-counts', [TableauBordController::class, 'getCounts']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
 Route::get('/distributionJeunesByAge', [TableauBordController::class, 'distributionJeunesByAge']);
-
-
 Route::get('tableau-bord/nombre-jeunes-par-dispositif', [TableauBordController::class, 'nombreJeunesParDispositif']);
 Route::get('/actions-jeunes', [TableauBordController::class, 'getJeunesByAction']);
 Route::get('/users-by-region', [TableauBordController::class, 'getUsersByRegion']);
 
+
+// Authentification
 
 Route::post('/login',[AuthController::class,'login']);
 Route::post('/register',[AuthController::class,'register']);
