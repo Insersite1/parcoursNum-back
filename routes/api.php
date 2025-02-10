@@ -179,3 +179,7 @@ Route::patch('/sondages/{id}/change-status', [SondageController::class, 'changeS
 Route::apiResource('reponses', ReponseController::class);
 Route::get('sondages/{sondage}/reponses', [ReponseController::class, 'getReponsesSondage']);
 
+Route::get('/structures/{structureId}/jeunes', [StructureController::class, 'getJeuneByStructureID']);
+Route::get('/structures/{structureId}/referants', [StructureController::class, 'getReferantByStructureID']);
+Route::get('/structures/{structureId}/actions', [StructureController::class, 'getActionsByStructure']);
+Route::post('/structures/{structureId}/add-action', [StructureController::class, 'addActionToStructure']);

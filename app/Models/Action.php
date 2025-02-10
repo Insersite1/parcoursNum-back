@@ -56,4 +56,8 @@ class Action extends Model
         return $this->belongsTo(StructureDispositif::class, 'structure_dispositif_id');
     }
 
+    public function structures()
+{
+    return $this->belongsToMany(Structure::class, 'structure_action');
+}
 }

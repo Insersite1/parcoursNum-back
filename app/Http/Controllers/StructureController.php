@@ -180,4 +180,118 @@ class StructureController extends Controller
     }
 
 
+    /**
+ * Description: Récupérer la liste des jeunes associés à une structure.
+ * Méthode: GET
+ * Entrée: ID de la structure.
+ * Sortie: Liste des jeunes avec un status 200,
+ * ou message d'erreur avec status 404 si la structure n'est pas trouvée.
+ */
+public function getJeuneByStructureID($structureId)
+{
+    // Vérifier si la structure existe
+    $structure = Structure::find($structureId);
+
+    if (!$structure) {
+        return response()->json(['message' => 'Structure non trouvée'], 404);
+    }
+
+    // Récupérer les jeunes associés à la structure
+    $jeunes = $structure->users()
+        ->whereHas('role', function ($query) {
+            $query->where('name', 'Jeune'); // Filtre par le nom du rôle
+        })
+        ->get();
+
+    return response()->json([
+        'message' => 'Liste des jeunes pour la structure donnée',
+        'data' => $jeunes
+    ], 200);
+}
+/**
+ * Description: Récupérer la liste des référents associés à une structure.
+ * Méthode: GET
+ * Entrée: ID de la structure.
+ * Sortie: Liste des référents avec un status 200,
+ * ou message d'erreur avec status 404 si la structure n'est pas trouvée.
+ */
+public function getReferantByStructureID($structureId)
+{
+    // Vérifier si la structure existe
+    $structure = Structure::find($structureId);
+
+    if (!$structure) {
+        return response()->json(['message' => 'Structure non trouvée'], 404);
+    }
+
+    // Récupérer les référents associés à la structure
+    $referants = $structure->users()
+        ->whereHas('role', function ($query) {
+            $query->where('name', 'Referent'); // Filtre par le nom du rôle
+        })
+        ->with('referant') // Charger les détails du référent
+        ->get();
+
+    return response()->json([
+        'message' => 'Liste des référents pour la structure donnée',
+        'data' => $referants
+    ], 200);
+}
+/**
+ * Description: Récupérer la liste des actions associées à une structure.
+ * Méthode: GET
+ * Entrée: ID de la structure.
+ * Sortie: Liste des actions avec un status 200,
+ * ou message d'erreur avec status 404 si la structure n'est pas trouvée.
+ */
+public function getActionsByStructure($structureId)
+{
+    // Vérifier si la structure existe
+    $structure = Structure::find($structureId);
+
+    if (!$structure) {
+        return response()->json(['message' => 'Structure non trouvée'], 404);
+    }
+
+    // Récupérer les actions associées à la structure
+    $actions = $structure->actions;
+
+    return response()->json([
+        'message' => 'Liste des actions pour la structure donnée',
+        'data' => $actions
+    ], 200);
+}
+/**
+ * Description: Ajouter une action à une structure.
+ * Méthode: POST
+ * Entrée: action_id (ID d'une action existante).
+ * Sortie: Message de confirmation avec status 201 en cas de succès,
+ * ou message d'erreur avec status 409 si l'action est déjà associée.
+ */
+public function addActionToStructure(Request $request, $structureId)
+{
+    // Valider les données entrantes
+    $validated = $request->validate([
+        'action_id' => 'required|exists:actions,id', // Vérifie que l'action existe
+    ]);
+
+    // Vérifier que la structure existe
+    $structure = Structure::findOrFail($structureId);
+
+    // Vérifier si l'association existe déjà
+    $exists = $structure->actions()->where('action_id', $validated['action_id'])->exists();
+
+    if ($exists) {
+        return response()->json([
+            'message' => 'L\'action est déjà associée à cette structure.',
+        ], 409); // Code 409 : Conflit
+    }
+
+    // Ajouter l'action à la structure
+    $structure->actions()->attach($validated['action_id']);
+
+    return response()->json([
+        'message' => 'Action ajoutée avec succès à la structure.',
+    ], 201); // Code 201 : Ressource créée
+}
 }
