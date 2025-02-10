@@ -65,7 +65,7 @@ class ActionController extends Controller
          try {
              // Validation des données
              $validatedData = $request->validate([
-                'couverture' => 'mimes:jpeg,png,jpg,gif',
+                 'couverture' => 'nullable|mimes:jpeg,png,jpg,gif', // Ajout d'une limite de taille 2MB
                  'nom' => 'required|string',
                  'place' => 'required|string',
                  'type' => 'required|string',
@@ -78,7 +78,7 @@ class ActionController extends Controller
                  'structure_id' => 'required|exists:structures,id',
                  'dispositif_id' => 'required|exists:dispositifs,id',
                  'auteur' => 'required|string',
-                 'statut' => 'in:Active,Inactive',
+                //  'statut' => 'in:Active,Inactive',
              ]);
 
              // Validation ou création de l'association structure_dispositif
@@ -98,12 +98,11 @@ class ActionController extends Controller
 
              // Créez l'action
              $action = new Action();
-
-             if ($request->hasFile('couverture')) {
-                $couverture = $request->file('avatar');
-                $couvertureName = time() . '.' . $couverture->extension();
-                $couverture->move(public_path('images'), $couvertureName);
-                $action->couverture = $couvertureName;
+            if ($request->hasFile('couverture')) {
+                $couverture = $request->file('couverture');
+                $avatarName = time() . '.' . $couverture->extension();
+                $couverture->move(public_path('images'), $avatarName);
+                 $action->couverture = $avatarName;
             }
              $action->nom = $validatedData['nom'];
              $action->place = $validatedData['place'];
@@ -114,7 +113,7 @@ class ActionController extends Controller
              $action->couleur = $validatedData['couleur'];
              $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
              $action->auteur = $validatedData['auteur'];
-             $action->statut = $validatedData['statut'];
+             $action->statut = "Active";
              $action->user_id = $userId;
 
              // Sauvegardez l'action

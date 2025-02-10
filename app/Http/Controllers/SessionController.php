@@ -21,10 +21,10 @@ class SessionController extends Controller
         $validatedData = $request->validate([
             'nom' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
-            'file' => 'nullable|file|max:2048',
+            'file' => 'nullable|file',
             'par' => 'required|string|max:255', // Nouveau champ obligatoire
             'action_id' => 'nullable|exists:actions,id',
         ]);
