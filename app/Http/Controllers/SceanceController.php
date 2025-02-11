@@ -48,13 +48,6 @@ class SceanceController extends Controller
                 'session_id' => 'nullable|exists:sessions,id', // Vérifie si la session existe
                 'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
-
-            // Gestion de l'upload de l'image de couverture
-            $couverturePath = null;
-            if ($request->hasFile('couverture')) {
-                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
-            }
-
             // Création de la nouvelle séance
             $sceance = new Sceance();
             $sceance->nom = $request->nom;
@@ -64,7 +57,15 @@ class SceanceController extends Controller
             $sceance->date_debut = $request->date_debut;
             $sceance->date_fin = $request->date_fin;
             $sceance->session_id = $request->session_id;
-            $sceance->couverture = $couverturePath;
+            // Traitement de la couverture (image)
+            if ($request->hasFile('couverture')) {
+                $couverture = $request->file('couverture');
+                $couvertureName = time() . '.' . $couverture->getClientOriginalExtension();
+                $couverture->move(public_path('images/sceances'), $couvertureName);
+                // $path = $couverture->storeAs('images/dispositif', $couvertureName, 'public'); // Stockage dans storage/app/public
+        
+                $sceance->couverture = "images/sceances/".$couvertureName;
+            }
 
             $sceance->save();
 
@@ -84,7 +85,6 @@ class SceanceController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Display the specified resource.
