@@ -180,7 +180,7 @@ class StructureController extends Controller
     }
 
 
-    /**
+/**
  * Description: Récupérer la liste des jeunes associés à une structure.
  * Méthode: GET
  * Entrée: ID de la structure.
