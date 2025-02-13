@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+
 
 class JeuneController extends Controller
 {
@@ -489,6 +491,100 @@ class JeuneController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Récupère la liste des séances futures d'un jeune.
+     *
+     * @param int $id L'identifiant du jeune
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSeanceByJeuneID($id)
+    {
+        try {
+            $user = User::where('id', $id)
+                ->where('role_id', 2)
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Utilisateur non trouvé ou n\'est pas un jeune.'
+                ], 404);
+            }
+
+            // Récupérer les séances futures
+            $currentDate = Carbon::now();
+            $sceances = $user->sceance()
+                ->where('date_fin', '>', $currentDate)
+                ->orderBy('date_fin', 'desc')
+                ->get();
+
+            // Vérifier si toutes les sceance ont une date_fin antérieure à la date actuelle
+            if ($sceances->isEmpty()) {
+                return response()->json([
+                    'message' => 'Toutes les sceances du jeune sont déjà achevées.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Séances récupérées avec succès',
+                'sceances' => $sceances
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère la liste des sessions futures d'un jeune.
+     *
+     * @param int $id L'identifiant du jeune
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSessionByJeuneID($id)
+    {
+        try {
+            $user = User::where('id', $id)
+                ->where('role_id', 2)
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Utilisateur non trouvé ou n\'est pas un jeune.'
+                ], 404);
+            }
+
+            // Récupérer les sessions futures
+            $currentDate = Carbon::now();
+            $sessions = $user->sessions()
+                ->where('date_fin', '>', $currentDate)
+                ->orderBy('date_fin', 'desc')
+                ->get();
+
+            // Vérifier si toutes les sessions ont une date_fin antérieure à la date actuelle
+            if ($sessions->isEmpty()) {
+                return response()->json([
+                    'message' => 'Toutes les sessions du jeune sont déjà achevées.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Sessions récupérées avec succès',
+                'sessions' => $sessions
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
 }
 

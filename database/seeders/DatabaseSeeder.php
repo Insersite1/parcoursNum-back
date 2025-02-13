@@ -26,13 +26,17 @@ class DatabaseSeeder extends Seeder
             ManagerSeeder::class,
             JeuneSeeder::class,
             StructureSeeder::class,
+            SceanceUserSeeder::class,
+            SessionUserSeeder::class,
+            SessionSeeder::class,
+            SceanceSeeder::class,
 
         ]);
         $this->call([
-            // UserSeeder::class,
+             UserSeeder::class,
         ]);
         $this->call([
-            ActionSeeder::class,
+             ActionSeeder::class,
         ]);
     }
 }
