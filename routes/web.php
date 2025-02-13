@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/distributionJeunesByAge', [App\Http\Controllers\TableauBordController::class, 'distributionJeunesByAge']);
