@@ -12,14 +12,17 @@ use App\Models\Referant;
 
 class ReferantController extends Controller
 {
-    /**
-     * Liste des référants.
-     */
+
+/**
+ * Description: Récupère la liste de tous les référants avec leurs structures associées.
+ * Méthode: GET
+ * Entrée: Aucune entrée nécessaire.
+ * Sortie: Liste des référants + statut 200 en cas de succès, message d'erreur + statut 500 en cas d'échec.
+ */
     public function index()
     {
-        // Récupère les utilisateurs avec role_id = 4 et leur structure associée
         $referants = User::where('role_id', 4)
-                         ->with('structure') // Charge la relation
+                         ->with('structure') 
                          ->get();
 
         return response()->json([
@@ -28,21 +31,22 @@ class ReferantController extends Controller
         ]);
     }
 
-
-    /**
-     * Création d'un nouveau référant.
-     */
+/**
+ * Description: Crée un nouveau référant avec les informations fournies.
+ * Méthode: POST
+ * Entrée: avatar, nom, prénom, email, numéro de téléphone, mot de passe, sexe, adresse, structure_id
+ * Sortie: Nouveau référant créé + statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
+ */
     public function store(Request $request)
     {
         try {
-            // Validation des données
             $validated = $request->validate([
-                'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  //'nullable|string',
+                'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  
                 'nom' => 'nullable|string|max:255',
                 'Prenom' => 'nullable|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'numTelephone' => 'nullable|string|max:20',
-                'password' => 'nullable|string', // Le mot de passe est requis avec une longueur minimale
+                'password' => 'nullable|string', 
                 'sexe' => 'nullable|in:M,F',
                 'Adresse' => 'nullable|string|max:255',
                 'structure_id' => 'nullable|exists:structures,id',
@@ -50,21 +54,19 @@ class ReferantController extends Controller
             
            $avatarName = null;
             $referant=new User();
-            // Gestion de l'avatar
             if ($request->hasFile('avatar')) {
                 $avatar = $request->file('avatar');
                 $avatarName = time() . '.' . $avatar->extension();
                 $avatar->move(public_path('images'), $avatarName);
                  $referant->avatar = $avatarName;
             }
-            // Création du référant
             $referant = User::create([
-                'avatar' => $avatarName, // Avtar par défaut si pas fourni
+                'avatar' => $avatarName, 
                 'nom' => $validated['nom'],
                 'Prenom' => $validated['Prenom'] ?? null,
                 'email' => $validated['email'],
                 'numTelephone' => $validated['numTelephone'],
-                'password' => Hash::make($validated['password']), // Hashage du mot de passe
+                'password' => Hash::make($validated['password']), 
                 'statut' => 'Active',
                 'sexe' => $validated['sexe'] ?? null,
                 'Adresse' => $validated['Adresse'] ?? null,
@@ -72,15 +74,13 @@ class ReferantController extends Controller
                 'structure_id' => $validated['structure_id'],
             ]);
 
-            // Réponse
             return response()->json([
                 'success' => true,
                 'message' => 'Référant créé avec succès.',
-                'data' => $referant->makeHidden(['password', 'remember_token']), // Masquer le mot de passe
+                'data' => $referant->makeHidden(['password', 'remember_token']), 
             ], 201);
 
         } catch (\Exception $e) {
-            // Gestion des erreurs générales
             return response()->json([
                 'success' => false,
                 'message' => 'Une erreur est survenue lors de la création du référant.',
@@ -89,9 +89,12 @@ class ReferantController extends Controller
         }
     }
 
-    /**
-     * Affiche un référant spécifique.
-     */
+/**
+ * Description: Récupère les détails d'un référant en fonction de son identifiant.
+ * Méthode: GET
+ * Entrée: id (identifiant du référant)
+ * Sortie: Détails du référant + statut 200 en cas de succès, message d'erreur + statut 404 si le référant est introuvable.
+ */  
     public function show($id)
     {
         $referant = User::where('role_id', 4)->findOrFail($id);
@@ -103,14 +106,14 @@ class ReferantController extends Controller
     }
 
     /**
-     * Mise à jour d'un référant.
-     */
-    
+ * Description: Met à jour les informations d'un référant existant.
+ * Méthode: PUT
+ * Entrée: id (identifiant du référant), nom, prénom, numéro de téléphone, email, sexe, adresse, structure_id
+ * Sortie: Référant mis à jour + statut 200 en cas de succès, message d'erreur + statut 404 si le référant est introuvable.
+ */
      public function update(Request $request, $id)
      {
-         // Validation des données
          $request->validate([
-            // 'avatar' =>'nullable|mimes:jpeg,png,jpg,gif',  //'nullable|string',
              'nom' =>'required|string|max:255',
              'Prenom' =>'required|string|max:255',
              'numTelephone' =>'required|string|max:255',
@@ -122,22 +125,10 @@ class ReferantController extends Controller
 
          ]);
      
-         // Récupération de l'utilisateur par son ID
          $user = User::find($id);
-        // $avatarName = null;         
-        //  if ($request->hasFile('avatar')) {
-        //      $avatar = $request->file('avatar');
-        //      $avatarName = time() . '.' . $avatar->extension();
-        //      $avatar->move(public_path('images'), $avatarName);
-        //       $user->avatar = $avatarName;
-        //  }
-         // Vérification si l'utilisateur existe
          if (!$user) {
              return response()->json(['message' => 'Utilisateur non trouvé'], 404);
          }
-     
-        //  Mise à jour des champs 'nom' et 'prenom'
-        // $user->avatar = $request->input(' $avatarName');
          $user->nom = $request->input('nom');
          $user->Prenom = $request->input('Prenom', null);
          $user->numTelephone = $request->input('numTelephone', null); 
@@ -147,11 +138,8 @@ class ReferantController extends Controller
          $user->structure_id = $request->input('structure_id'); 
 
 
-    
-         // Sauvegarde des modifications
          $user->save();
      
-         // Retourner la réponse avec les nouvelles données
          return response()->json([
              'success' => true,
              'message' => 'Utilisateur mis à jour avec succès',
@@ -159,11 +147,13 @@ class ReferantController extends Controller
          ]);
      }
      
+/**
+ * Description: Supprime un référant en fonction de son identifiant.
+ * Méthode: DELETE
+ * Entrée: id (identifiant du référant)
+ * Sortie: Message de confirmation de suppression + statut 200 en cas de succès, message d'erreur + statut 404 si le référant est introuvable.
+ */
   
-
-    /**
-     * Suppression d'un référant.
-     */
     public function destroyreferent($id)
     {
         $referant = User::where('role_id', 4)->findOrFail($id);
@@ -175,19 +165,23 @@ class ReferantController extends Controller
         ]);
     }
 
-
+/**
+ * Description: Met à jour l'état (actif/inactif) d'un référant.
+ * Méthode: PUT
+ * Entrée: id (identifiant du référant)
+ * Sortie: Message de confirmation de mise à jour de l'état + statut 200 en cas de succès, message d'erreur + statut 404 si le référant est introuvable.
+ */
     public function updatereferantsetat($id)
     {
-        $User = User::find($id); // Trouver l'utilisateur par son ID
+        $User = User::find($id); 
         if ($User) {
-            // Basculer l'état en fonction de la valeur actuelle
             if ($User->statut == 'Active') {
                 $User->statut = 'Inactive';
             } elseif ($User->statut == 'Inactive') {
                 $User->statut = 'Active';
             }
             
-            $User->save(); // Enregistrer les modifications
+            $User->save(); 
             
             return response()->json(['message' => 'État mis à jour avec succès.'], 200);
         } else {

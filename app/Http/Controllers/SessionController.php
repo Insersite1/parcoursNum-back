@@ -8,14 +8,23 @@ use Illuminate\Support\Facades\Storage;
 
 class SessionController extends Controller
 {
-    // Affiche toutes les sessions
+/**
+ * Description: Récupère la liste de toutes les sessions avec leurs actions associées.
+ * Méthode: GET
+ * Entrée: Aucune
+ * Sortie: Liste des sessions avec statut 200 en cas de succès.
+ */
     public function index()
     {
         $sessions = Session::with('action')->get();
         return response()->json($sessions);
     }
-
-    // Crée une nouvelle session
+/**
+ * Description: Crée une nouvelle session.
+ * Méthode: POST
+ * Entrée: nom, description, image (facultatif), date_debut, date_fin, file (facultatif), par, action_id (facultatif)
+ * Sortie: La session créée avec statut 201 en cas de succès.
+ */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -25,16 +34,14 @@ class SessionController extends Controller
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'file' => 'nullable|file',
-            'par' => 'required|string|max:255', // Nouveau champ obligatoire
+            'par' => 'required|string|max:255',
             'action_id' => 'nullable|exists:actions,id',
         ]);
 
-        // Gestion de l'image
         if ($request->hasFile('image')) {
             $validatedData['image'] = $request->file('image')->store('images', 'public');
         }
 
-        // Gestion du fichier
         if ($request->hasFile('file')) {
             $validatedData['file'] = $request->file('file')->store('files', 'public');
         }
@@ -43,129 +50,90 @@ class SessionController extends Controller
 
         return response()->json($session, 201);
     }
-
-    // Affiche une session spécifique
+/**
+ * Description: Récupère les détails d'une session spécifique avec son action associée.
+ * Méthode: GET
+ * Entrée: Session (modèle de session)
+ * Sortie: Détails de la session avec statut 200 en cas de succès.
+ */
     public function show(Session $session)
     {
         return response()->json($session->load('action'));
     }
 
-    // // Met à jour une session
-    // public function update(Request $request, Session $session)
-    // {
-    //     $validatedData = $request->validate([
-    //         'nom' => 'sometimes|required|string|max:255',
-    //         'description' => 'sometimes|required|string',
-    //         'image' => 'nullable|image|max:2048',
-    //         'date_debut' => 'sometimes|required|date',
-    //         'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
-    //         'file' => 'nullable|file|max:2048',
-    //         'par' => 'sometimes|required|string|max:255',
-    //         'action_id' => 'nullable|exists:actions,id',
-    //     ]);
-
-    //     // Gestion de l'image
-    //     if ($request->hasFile('image')) {
-    //         if ($session->image) {
-    //             Storage::disk('public')->delete($session->image);
-    //         }
-    //         $validatedData['image'] = $request->file('image')->store('images', 'public');
-    //     }
-    //     if ($request->hasFile('file')) {
-    //         if ($session->file) {
-    //             Storage::disk('public')->delete($session->file);
-    //         }
-    //         $validatedData['file'] = $request->file('file')->store('files', 'public');
-    //     }
-
-    //     $session->update($validatedData);
-
-    //     return response()->json($session);
-    // }
-
-    // Met à jour une session
+/**
+ * Description: Met à jour une session existante.
+ * Méthode: PUT
+ * Entrée: nom, description, image (facultatif), date_debut, date_fin, file (facultatif), par, action_id (facultatif)
+ * Sortie: La session mise à jour avec statut 200 en cas de succès.
+ */
     public function update(Request $request, Session $session)
     {
         $validatedData = $request->validate([
             'nom' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
-            'image' => 'nullable|image|max:2048', // Image est optionnelle
+            'image' => 'nullable|image|max:2048', 
             'date_debut' => 'sometimes|required|date',
             'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
-            'file' => 'nullable|file|max:2048', // Fichier est optionnel
+            'file' => 'nullable|file|max:2048',
             'par' => 'sometimes|required|string|max:255',
             'action_id' => 'nullable|exists:actions,id',
         ]);
 
-        // Gestion de l'image (uniquement si une nouvelle image est fournie)
         if ($request->hasFile('image')) {
-            // Supprimer l'ancienne image si elle existe
             if ($session->image) {
                 Storage::disk('public')->delete($session->image);
             }
-            // Sauvegarder la nouvelle image
             $validatedData['image'] = $request->file('image')->store('images', 'public');
         } else {
-            // Si aucune nouvelle image n'est fournie, on conserve l'ancienne
             unset($validatedData['image']);
         }
 
-        // Gestion du fichier (uniquement si un nouveau fichier est fourni)
         if ($request->hasFile('file')) {
-            // Supprimer l'ancien fichier si il existe
             if ($session->file) {
                 Storage::disk('public')->delete($session->file);
             }
-            // Sauvegarder le nouveau fichier
             $validatedData['file'] = $request->file('file')->store('files', 'public');
         } else {
-            // Si aucun nouveau fichier n'est fourni, on conserve l'ancien
             unset($validatedData['file']);
         }
 
-        // Mise à jour de la session avec les données validées
         $session->update($validatedData);
 
         return response()->json($session);
     }
-
-    // Met à jour les upload une session
-    // avec la methode post
+/**
+ * Description: Permet de télécharger ou mettre à jour les fichiers (image, fichier) d'une session.
+ * Méthode: POST
+ * Entrée: image (facultatif), file (facultatif)
+ * Sortie: Message de confirmation avec statut 200 en cas de succès, session mise à jour.
+ */
     public function uploadFile(Request $request, Session $session)
     {
-        // Validation des fichiers
         $validatedData = $request->validate([
-            'image' => 'nullable|image|max:2048', // Validation pour les images
-            'file' => 'nullable|file|max:2048',  // Validation pour d'autres fichiers
+            'image' => 'nullable|image|max:2048', 
+            'file' => 'nullable|file|max:2048',  
         ]);
 
-        // Sauvegarde de l'image si elle est fournie
         if ($request->hasFile('image')) {
             $previousImage = $session->image;
 
-            // Supprimer l'ancienne image si elle existe
             if ($previousImage) {
                 Storage::disk('public')->delete($previousImage);
             }
 
-            // Sauvegarder la nouvelle image
             $validatedData['image'] = $request->file('image')->store('images', 'public');
         }
 
-        // Sauvegarde du fichier si fourni
         if ($request->hasFile('file')) {
             $previousFile = $session->file;
 
-            // Supprimer l'ancien fichier si existant
             if ($previousFile) {
                 Storage::disk('public')->delete($previousFile);
             }
-
-            // Sauvegarder le nouveau fichier
             $validatedData['file'] = $request->file('file')->store('files', 'public');
         }
 
-        // Mise à jour de la session avec les nouveaux fichiers
         $session->update($validatedData);
 
         return response()->json([
@@ -173,9 +141,12 @@ class SessionController extends Controller
             'session' => $session,
         ]);
     }
-
-
-    // Supprime une session
+/**
+ * Description: Supprime une session ainsi que ses fichiers associés (image et fichier).
+ * Méthode: DELETE
+ * Entrée: Session (modèle de session)
+ * Sortie: Message de confirmation de suppression avec statut 200 en cas de succès.
+ */
     public function destroy(Session $session)
     {
         if ($session->image) {
@@ -189,58 +160,24 @@ class SessionController extends Controller
 
         return response()->json(['message' => 'Session supprimée avec succès']);
     }
-
-    //Rechercher une session
-    /*public function search(Request $request)
-    {
-        $query = Session::query();
-
-        // Recherche par nom
-        if ($request->has('nom') && !empty($request->nom)) {
-            $query->where('nom', 'LIKE', '%' . $request->nom . '%');
-        }
-
-        // Recherche par 'par'
-        if ($request->has('par') && !empty($request->par)) {
-            $query->where('par', 'LIKE', '%' . $request->par . '%');
-        }
-
-        // Recherche par date
-        if ($request->has('date') && !empty($request->date)) {
-            $query->whereDate('date_debut', '<=', $request->date)
-                ->whereDate('date_fin', '>=', $request->date);
-        }
-
-        // Recherche par action
-        if ($request->has('action') && !empty($request->action)) {
-            $query->whereHas('action', function ($subQuery) use ($request) {
-                $subQuery->where('nom', 'LIKE', '%' . $request->action . '%'); // Assurez-vous que la table 'actions' a une colonne 'nom'
-            });
-        }
-
-        // Obtenez les résultats avec les relations
-       // $sessions = $query->with('action')->get();
-
-        return response()->json($sessions);
-    }*/
-
+/**
+ * Description: Recherche des sessions en fonction d'un mot-clé dans plusieurs champs (nom, par, action, dates).
+ * Méthode: GET
+ * Entrée: search (terme de recherche)
+ * Sortie: Liste des sessions correspondant au terme de recherche avec statut 200 en cas de succès.
+ */
     public function search($search)
     {
         $query = Session::query();
-
-        // Recherche dans les champs 'nom', 'par', et via la relation 'action'
         $query->where('nom', 'LIKE', '%' . $search . '%')
             ->orWhere('par', 'LIKE', '%' . $search . '%')
             ->orWhereHas('action', function ($subQuery) use ($search) {
-                $subQuery->where('nom', 'LIKE', '%' . $search . '%'); // Recherche dans le champ 'nom' de la table 'actions'
+                $subQuery->where('nom', 'LIKE', '%' . $search . '%'); 
             })
             ->orWhere(function ($dateQuery) use ($search) {
-                // Recherche par date_debut ou date_fin
                 $dateQuery->where('date_debut', 'LIKE', '%' . $search . '%')
                             ->orWhere('date_fin', 'LIKE', '%' . $search . '%');
             });
-
-        // Obtenez les résultats avec les relations
         $sessions = $query->with('action')->get();
 
         return response()->json($sessions);

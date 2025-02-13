@@ -10,67 +10,12 @@ use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreRoleRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Role $role)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Role $role)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateRoleRequest $request, Role $role)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Role $role)
-    {
-        //
-    }
-
-        /**
- * Récupère le rôle d'un utilisateur par son nom de rôle.
- *
- * @param string $roleName Le nom du rôle à récupérer.
- * @return \Illuminate\Http\JsonResponse Réponse JSON avec le rôle trouvé ou une erreur.
+/**
+ * Description: Récupère un rôle en fonction de son nom.
+ * Méthode: GET
+ * Entrée: roleName (nom du rôle à rechercher)
+ * Sortie: Détails du rôle trouvé + statut 200 en cas de succès, message d'erreur + statut 404 si le rôle n'est pas trouvé, message d'erreur + statut 500 en cas d'échec.
  */
 public function getRoleByName($roleName)
 {

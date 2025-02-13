@@ -77,22 +77,26 @@ class StructureController extends Controller
 
         return response()->json($structure, 200);
     }
-
+/**
+ * Description: Modifie le statut d'une structure (Active/Inactive).
+ * Méthode: PUT
+ * Entrée: 
+ *    - statut (doit être "Active" ou "Inactive")
+ *    - id (identifiant de la structure)
+ * Sortie:
+ *    - 200 en cas de succès avec les détails de la structure mise à jour.
+ *    - 404 si la structure n'est pas trouvée.
+ */
     public function changeStatus(Request $request, $id)
     {
-        // Valider le statut fourni
         $validated = $request->validate([
-            'statut' => 'required|in:Active,Inactive', // Assure que le statut est soit "Active" soit "Inactive"
+            'statut' => 'required|in:Active,Inactive', 
         ]);
-
-        // Trouver la structure par son ID
         $structure = Structure::find($id);
 
         if (!$structure) {
             return response()->json(['message' => 'Structure non trouvée.'], 404);
         }
-
-        // Mettre à jour le statut
         $structure->statut = $validated['statut'];
         $structure->save();
 
@@ -101,9 +105,6 @@ class StructureController extends Controller
             'structure' => $structure,
         ], 200);
     }
-
-
-
 
 
     /**
@@ -115,15 +116,10 @@ class StructureController extends Controller
      */
     public function addDispositifStructure(Request $request, $structureId)
     {
-        // Valider les données entrantes
         $validated = $request->validate([
-            'dispositif_id' => 'required|exists:dispositifs,id', // Vérifie que le dispositif existe
+            'dispositif_id' => 'required|exists:dispositifs,id', 
         ]);
-
-        // Vérifie que la structure existe
         $structure = Structure::findOrFail($structureId);
-
-        // Vérifier si l'association existe déjà
         $exists = StructureDispositif::where('structure_id', $structureId)
             ->where('dispositif_id', $validated['dispositif_id'])
             ->exists();
@@ -131,10 +127,8 @@ class StructureController extends Controller
         if ($exists) {
             return response()->json([
                 'message' => 'Le dispositif est déjà associé à cette structure.',
-            ], 409); // Code 409 : Conflit
+            ], 409); 
         }
-
-        // Créer l'association
         $structureDispositif = StructureDispositif::create([
             'structure_id' => $structureId,
             'dispositif_id' => $validated['dispositif_id'],
@@ -143,36 +137,37 @@ class StructureController extends Controller
         return response()->json([
             'message' => 'Dispositif ajouté avec succès à la structure.',
             'data' => $structureDispositif,
-        ], 201); // Code 201 : Ressource créée
+        ], 201); 
     }
-
-
-    // Récupérer les dispositifs d'une structure
+/**
+ * Description: Récupère la liste des dispositifs associés à une structure donnée.
+ * Méthode: GET
+ * Entrée: 
+ *    - structureId (identifiant de la structure)
+ * Sortie:
+ *    - 200 avec la liste des dispositifs associés à la structure, ou un message indiquant qu'aucun dispositif n'a été trouvé.
+ *    - 404 si la structure n'est pas trouvée.
+ */
 
     public function getDispositifsForStructure($structureId)
     {
-        // Vérifier si la structure existe
         $structure = Structure::find($structureId);
 
         if (!$structure) {
             return response()->json(['error' => 'Structure not found'], 404);
         }
 
-        // Récupérer les dispositifs via la table de jonction
         $dispositifs = StructureDispositif::where('structure_id', $structureId)
             ->join('dispositifs', 'structure_dispositifs.dispositif_id', '=', 'dispositifs.id')
-            ->select('dispositifs.*') // Sélectionner uniquement les colonnes de la table dispositifs
+            ->select('dispositifs.*') 
             ->get();
 
-        // Vérifier si des dispositifs existent pour cette structure
         if ($dispositifs->isEmpty()) {
             return response()->json([
                 'message' => 'Aucun dispositif trouvé pour cette structure.',
                 'data' => []
             ], 200);
         }
-
-        // Retourner la réponse avec la liste des dispositifs
         return response()->json([
             'message' => 'Liste des dispositifs pour la structure donnée',
             'data' => $dispositifs
@@ -189,17 +184,14 @@ class StructureController extends Controller
  */
 public function getJeuneByStructureID($structureId)
 {
-    // Vérifier si la structure existe
     $structure = Structure::find($structureId);
 
     if (!$structure) {
         return response()->json(['message' => 'Structure non trouvée'], 404);
     }
-
-    // Récupérer les jeunes associés à la structure
     $jeunes = $structure->users()
         ->whereHas('role', function ($query) {
-            $query->where('name', 'Jeune'); // Filtre par le nom du rôle
+            $query->where('name', 'Jeune'); 
         })
         ->get();
 
@@ -217,19 +209,16 @@ public function getJeuneByStructureID($structureId)
  */
 public function getReferantByStructureID($structureId)
 {
-    // Vérifier si la structure existe
     $structure = Structure::find($structureId);
 
     if (!$structure) {
         return response()->json(['message' => 'Structure non trouvée'], 404);
     }
-
-    // Récupérer les référents associés à la structure
     $referants = $structure->users()
         ->whereHas('role', function ($query) {
-            $query->where('name', 'Referent'); // Filtre par le nom du rôle
+            $query->where('name', 'Referent');
         })
-        ->with('referant') // Charger les détails du référent
+        ->with('referant') 
         ->get();
 
     return response()->json([
@@ -246,14 +235,11 @@ public function getReferantByStructureID($structureId)
  */
 public function getActionsByStructure($structureId)
 {
-    // Vérifier si la structure existe
     $structure = Structure::find($structureId);
 
     if (!$structure) {
         return response()->json(['message' => 'Structure non trouvée'], 404);
     }
-
-    // Récupérer les actions associées à la structure
     $actions = $structure->actions;
 
     return response()->json([
@@ -270,28 +256,23 @@ public function getActionsByStructure($structureId)
  */
 public function addActionToStructure(Request $request, $structureId)
 {
-    // Valider les données entrantes
     $validated = $request->validate([
-        'action_id' => 'required|exists:actions,id', // Vérifie que l'action existe
+        'action_id' => 'required|exists:actions,id',
     ]);
 
-    // Vérifier que la structure existe
     $structure = Structure::findOrFail($structureId);
 
-    // Vérifier si l'association existe déjà
     $exists = $structure->actions()->where('action_id', $validated['action_id'])->exists();
 
     if ($exists) {
         return response()->json([
             'message' => 'L\'action est déjà associée à cette structure.',
-        ], 409); // Code 409 : Conflit
+        ], 409); 
     }
-
-    // Ajouter l'action à la structure
     $structure->actions()->attach($validated['action_id']);
 
     return response()->json([
         'message' => 'Action ajoutée avec succès à la structure.',
-    ], 201); // Code 201 : Ressource créée
+    ], 201); 
 }
 }

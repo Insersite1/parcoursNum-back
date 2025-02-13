@@ -12,9 +12,13 @@ use Mockery\Exception;
 
 class SceanceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+/**
+ * Description: Récupère la liste de toutes les séances avec leurs sessions associées.
+ * Méthode: GET
+ * Entrée: Aucune
+ * Sortie: Liste des séances avec statut 201 en cas de succès.
+ */
     public function index()
     {
         $sceances = Sceance::with('session')->get();
@@ -23,32 +27,24 @@ class SceanceController extends Controller
             'data' => $sceances
         ], 201);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+/**
+ * Description: Crée une nouvelle séance.
+ * Méthode: POST
+ * Entrée: nom, session_code, description, date_debut, date_fin, session_id, couverture (facultatif)
+ * Sortie: La séance créée avec statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
+ */
     public function store(Request $request)
     {
         try {
-            // Validation des données
             $request->validate([
                 'nom' => 'nullable|string|max:255',
                 'session_code' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'date_debut' => 'required|date',
                 'date_fin' => 'required|date|after_or_equal:date_debut',
-                'session_id' => 'nullable|exists:sessions,id', // Vérifie si la session existe
+                'session_id' => 'nullable|exists:sessions,id', 
                 'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
-            // Création de la nouvelle séance
             $sceance = new Sceance();
             $sceance->nom = $request->nom;
             $sceance->par = $request->par;; 
@@ -57,19 +53,15 @@ class SceanceController extends Controller
             $sceance->date_debut = $request->date_debut;
             $sceance->date_fin = $request->date_fin;
             $sceance->session_id = $request->session_id;
-            // Traitement de la couverture (image)
             if ($request->hasFile('couverture')) {
                 $couverture = $request->file('couverture');
                 $couvertureName = time() . '.' . $couverture->getClientOriginalExtension();
                 $couverture->move(public_path('images/sceances'), $couvertureName);
-                // $path = $couverture->storeAs('images/dispositif', $couvertureName, 'public'); // Stockage dans storage/app/public
-        
                 $sceance->couverture = "images/sceances/".$couvertureName;
             }
 
             $sceance->save();
 
-            // Réponse en cas de succès
             return response()->json([
                 'status' => 'success',
                 'message' => 'Séance créée avec succès',
@@ -77,7 +69,6 @@ class SceanceController extends Controller
             ], 201);
 
         } catch (Exception $e) {
-            // Gestion des erreurs
             return response()->json([
                 'status' => 'error',
                 'message' => 'Une erreur est survenue lors de la création de la séance.',
@@ -85,10 +76,13 @@ class SceanceController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
+/**
+ * Description: Récupère les détails d'une séance spécifique par son ID.
+ * Méthode: GET
+ * Entrée: id (identifiant de la séance)
+ * Sortie: Détails de la séance avec statut 200 en cas de succès, message d'erreur + statut 404 si la séance n'est pas trouvée.
+ */
+ 
     public function show($id)
     {
         $sceance = Sceance::with('session')->find($id);
@@ -104,100 +98,26 @@ class SceanceController extends Controller
             'data' => $sceance
         ], 200);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sceance $sceance)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, $id)
-    // {
-    //     try {
-    //         // Récupération de la séance à mettre à jour
-    //         $sceance = Sceance::findOrFail($id);
-
-    //         // Validation des données
-    //         $request->validate([
-    //             'nom' => 'required|string|max:255',
-    //             'par' => 'nullable|string|max:255', // Champ facultatif
-    //             'session_code' => 'required|string|max:255',
-    //             'description' => 'nullable|string',
-    //             'date_debut' => 'required|date',
-    //             'date_fin' => 'required|date|after_or_equal:date_debut',
-    //             'session_id' => 'nullable|exists:sessions,id', // Relation clé étrangère
-    //             'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    //         ]);
-
-    //         // Mise à jour des champs texte et numériques
-    //         $sceance->nom = $request->nom;
-    //         $sceance->par = $request->par;
-    //         $sceance->session_code = $request->session_code;
-    //         $sceance->description = $request->description;
-    //         $sceance->date_debut = $request->date_debut;
-    //         $sceance->date_fin = $request->date_fin;
-    //         $sceance->session_id = $request->session_id;
-
-    //         // Gestion de la couverture
-    //         if ($request->hasFile('couverture')) {
-    //             // Suppression de l'ancienne image si elle existe
-    //             if ($sceance->couverture) {
-    //                 Storage::disk('public')->delete($sceance->couverture);
-    //             }
-    //             // Stockage de la nouvelle image
-    //             $couverturePath = $request->file('couverture')->store('sceances/couvertures', 'public');
-    //             $sceance->couverture = $couverturePath;
-    //         }
-
-    //         // Sauvegarde des modifications
-    //         $sceance->save();
-
-    //         // Réponse en cas de succès
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'message' => 'Séance mise à jour avec succès',
-    //             'data' => $sceance
-    //         ], 200);
-
-    //     } catch (ModelNotFoundException $e) {
-    //         // Réponse en cas de séance introuvable
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Séance introuvable',
-    //         ], 404);
-    //     } catch (Exception $e) {
-    //         // Réponse en cas d'erreur générale
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Une erreur est survenue lors de la mise à jour de la séance.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
+/**
+ * Description: Met à jour une séance existante.
+ * Méthode: PUT
+ * Entrée: id (identifiant de la séance), nom, par, session_code, description, date_debut, date_fin, session_id, couverture (facultatif)
+ * Sortie: Message de confirmation de mise à jour de la séance avec statut 200 en cas de succès, message d'erreur + statut 404 ou 500 en cas d'échec.
+ */
     public function update(Request $request, $id)
     {
         try {
-            // Récupération de la séance à mettre à jour
             $sceance = Sceance::findOrFail($id);
-
-            // Validation des données
             $request->validate([
                 'nom' => 'sometimes|required|string|max:255',
-                'par' => 'nullable|string|max:255', // Champ facultatif
+                'par' => 'nullable|string|max:255', 
                 'session_code' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
                 'date_debut' => 'sometimes|required|date',
                 'date_fin' => 'sometimes|required|date|after_or_equal:date_debut',
-                'session_id' => 'nullable|exists:sessions,id', // Relation clé étrangère
+                'session_id' => 'nullable|exists:sessions,id', 
             ]);
 
-            // Mise à jour des champs texte et numériques
             $sceance->nom = $request->nom;
             $sceance->par = $request->par;
             $sceance->session_code = $request->session_code;
@@ -206,21 +126,14 @@ class SceanceController extends Controller
             $sceance->date_fin = $request->date_fin;
             $sceance->session_id = $request->session_id;
 
-            // Gestion de la couverture
             if ($request->hasFile('couverture')) {
-                // Suppression de l'ancienne image si elle existe
                 if ($sceance->couverture) {
                     Storage::disk('public')->delete($sceance->couverture);
                 }
-                // Stockage de la nouvelle image
                 $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
                 $sceance->couverture = $couverturePath;
             }
-
-            // Sauvegarde des modifications
             $sceance->save();
-
-            // Réponse en cas de succès
             return response()->json([
                 'status' => 'success',
                 'message' => 'Séance mise à jour avec succès',
@@ -228,13 +141,11 @@ class SceanceController extends Controller
             ], 200);
 
         } catch (ModelNotFoundException $e) {
-            // Réponse en cas de séance introuvable
             return response()->json([
                 'status' => 'error',
                 'message' => 'Séance introuvable',
             ], 404);
         } catch (Exception $e) {
-            // Réponse en cas d'erreur générale
             return response()->json([
                 'status' => 'error',
                 'message' => 'Une erreur est survenue lors de la mise à jour de la séance.',
@@ -243,11 +154,12 @@ class SceanceController extends Controller
         }
     }
 
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
+/**
+ * Description: Supprime une séance existante.
+ * Méthode: DELETE
+ * Entrée: id (identifiant de la séance)
+ * Sortie: Message de confirmation de suppression de la séance avec statut 200 en cas de succès, message d'erreur + statut 404 si la séance n'est pas trouvée.
+ */
     public function destroy($id)
     {
         $sceance = Sceance::find($id);

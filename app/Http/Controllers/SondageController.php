@@ -14,27 +14,25 @@ use App\Http\Requests\UpdateSondageRequest;
 
 class SondageController extends Controller
 {
-    /**
-     * Liste tous les sondages
-     */
+/**
+ * Description: Récupère la liste de tous les sondages avec leurs questions associées.
+ * Méthode: GET
+ * Entrée: Aucune
+ * Sortie: Liste des sondages avec leurs questions avec statut 200 en cas de succès.
+ */
     public function index()
     {
         $sondages = Sondage::with('questions')->get();
         return response()->json($sondages);
     }
-
-    /**
-     * Créer un nouveau sondage
-     */
+/**
+ * Description: Crée un nouveau sondage avec ses questions associées.
+ * Méthode: POST
+ * Entrée: titre, description, date_debut, date_fin, est_publie, pour_tous_utilisateurs, questions (tableau d'objets avec titre_question, type_question, options, obligatoire)
+ * Sortie: Le sondage créé avec statut 201 en cas de succès.
+ */
     public function store(Request $request)
     {
-        // Vérification du rôle de l'utilisateur connecté
-        /*$user = auth()->user();
-        if (!$user || $user->role !== 'Referent') {
-            return response()->json(['error' => 'Accès non autorisé. Seul le Référent peut créer des sondages.'], 403);
-        }*/
-    
-        // Validation des données reçues
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -54,7 +52,6 @@ class SondageController extends Controller
     
             $sondage = Sondage::create([
                 ...$validated,
-                //'user_id' => $user->id
             ]);
     
             foreach ($request->questions as $questionData) {
@@ -72,21 +69,14 @@ class SondageController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Met à jour un sondage existant
-     * @param Request $request
-     * @param Sondage $sondage
-     * @return \Illuminate\Http\JsonResponse
-     */
+/**
+ * Description: Met à jour un sondage existant et ses questions associées.
+ * Méthode: PUT
+ * Entrée: titre, description, date_debut, date_fin, est_public, pour_tous_utilisateurs, statut, questions (tableau d'objets avec titre_question, type_question, options, obligatoire)
+ * Sortie: Le sondage mis à jour avec statut 200 en cas de succès.
+ */
     public function update(Request $request, Sondage $sondage)
     {
-        // Vérification que l'utilisateur est propriétaire du sondage
-        /*$user = auth()->user();
-        if (!$user || $user->role !== 'Referent') {
-            return response()->json(['error' => 'Accès non autorisé. Seul le Référent peut créer des sondages.'], 403);
-        }*/
-
         $validated = $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
@@ -104,16 +94,9 @@ class SondageController extends Controller
 
         try {
             DB::beginTransaction();
-
-            // Mise à jour du sondage
             $sondage->update($validated);
-
-            // Si des questions sont fournies, mettre à jour les questions
             if ($request->has('questions')) {
-                // Supprimer les anciennes questions
                 $sondage->questions()->delete();
-
-                // Créer les nouvelles questions
                 foreach ($request->questions as $questionData) {
                     $sondage->questions()->create($questionData);
                 }
@@ -135,14 +118,14 @@ class SondageController extends Controller
         }
     }
 
-    /**
-     * Affiche les détails d'un sondage spécifique
-     * @param Sondage $sondage
-     * @return \Illuminate\Http\JsonResponse
-     */
+/**
+ * Description: Récupère les détails d'un sondage spécifique avec ses questions associées.
+ * Méthode: GET
+ * Entrée: Sondage (modèle de sondage)
+ * Sortie: Détails du sondage avec statut 200 en cas de succès.
+ */
     public function show(Sondage $sondage)
     {
-        // Charger les relations associées (questions dans ce cas)
         $sondage->load('questions');
 
         return response()->json([
@@ -150,16 +133,14 @@ class SondageController extends Controller
             'sondage' => $sondage,
         ], 200);
     }
-
-
-    /**
-     * Supprime un sondage
-     * @param Sondage $sondage
-     * @return \Illuminate\Http\JsonResponse
-     */
+/**
+ * Description: Supprime un sondage si l'utilisateur est autorisé à le faire.
+ * Méthode: DELETE
+ * Entrée: Sondage (modèle de sondage)
+ * Sortie: Message de confirmation de suppression avec statut 200 en cas de succès, ou message de non autorisation avec statut 403.
+ */
     public function destroy(Sondage $sondage)
     {
-        // Vérification que l'utilisateur est propriétaire du sondage
         if ($sondage->user_id !== auth()->id()) {
             return response()->json(['message' => 'Non autorisé'], 403);
         }
@@ -167,7 +148,6 @@ class SondageController extends Controller
         try {
             DB::beginTransaction();
 
-            // Suppression du sondage (les questions et réponses seront supprimées automatiquement grâce à onDelete('cascade'))
             $sondage->delete();
 
             DB::commit();
@@ -184,23 +164,24 @@ class SondageController extends Controller
             ], 500);
         }
     }
-
-    /*Fonction qui permet de mettre a jour le statut de sondage*/
+/**
+ * Description: Change le statut (actif/inactif) d'un sondage.
+ * Méthode: PUT
+ * Entrée: statut (actif/inactif)
+ * Sortie: Le sondage avec le statut mis à jour avec statut 200 en cas de succès.
+ */
     public function changeStatus(Request $request, $id)
     {
-        // Valider le statut fourni
         $validated = $request->validate([
-            'statut' => 'required|in:actif,inactif', // Assure que le statut est soit "Active" soit "Inactive"
+            'statut' => 'required|in:actif,inactif', 
         ]);
 
-        // Trouver la sondage par son ID
         $sondage = Sondage::find($id);
 
         if (!$sondage) {
             return response()->json(['message' => 'Sondage non trouvée.'], 404);
         }
 
-        // Mettre à jour le statut
         $sondage->statut = $validated['statut'];
         $sondage->save();
 
@@ -208,28 +189,6 @@ class SondageController extends Controller
             'message' => 'Statut de la sondage mis à jour avec succès.',
             'sondage' => $sondage,
         ], 200);
-    }
-
-    
-
-    
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-
-   
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sondage $sondage)
-    {
-        //
     }
 
    
