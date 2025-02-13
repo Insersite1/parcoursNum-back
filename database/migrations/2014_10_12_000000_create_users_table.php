@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('Prenom')->nullable();
             $table->string('email')->unique();
             $table->string('numTelephone')->nullable();
+            $table->string('numTelephone')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('statut',['Active', 'Inactive'])->default('Active');
@@ -39,6 +40,7 @@ return new class extends Migration
             $table->string('ville')->nullable();
             $table->string('NumSecuriteSocial')->nullable();
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
+            $table->foreignIdFor( \App\Models\Structure::class)->nullable();
             $table->foreignIdFor( \App\Models\Structure::class)->nullable();
             $table->rememberToken();
             $table->timestamps();
