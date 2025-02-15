@@ -58,7 +58,7 @@ class SceanceController extends Controller
             // Création de la nouvelle séance
             $sceance = new Sceance();
             $sceance->nom = $request->nom;
-            $sceance->par = $request->par;; 
+            $sceance->par = $request->par;;
             $sceance->session_code = $request->session_code;
             $sceance->description = $request->description;
             $sceance->date_debut = $request->date_debut;
@@ -268,5 +268,20 @@ class SceanceController extends Controller
             'status' => 'success',
             'message' => 'Séance supprimée avec succès'
         ], 200);
+    }
+
+
+    public function getSceanceBySessionID($session_id)
+    {
+        // Recherche toutes les séances associées à la session donnée
+        $sceances = Sceance::where('session_id', $session_id)->get();
+
+        // Vérifie si aucune séance n'a été trouvée pour cette session
+        if ($sceances->isEmpty()) {
+            return response()->json(['message' => 'Aucune séance trouvée pour cette session'], 404);
+        }
+
+        // Retourne les séances trouvées au format JSON
+        return response()->json($sceances);
     }
 }

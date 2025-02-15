@@ -17,3 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/distributionJeunesByAge', [App\Http\Controllers\TableauBordController::class, 'distributionJeunesByAge']);
+
+
+Route::get('/sceances/session/{session_id}', [SceanceController::class, 'getSceanceBySessionID']);
+Route::get('/sessions/action/{action_id}', [SessionController::class, 'getSessionByActionID']);

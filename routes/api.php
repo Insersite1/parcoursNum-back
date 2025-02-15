@@ -185,3 +185,7 @@ Route::get('/structures/{structureId}/jeunes', [StructureController::class, 'get
 Route::get('/structures/{structureId}/referants', [StructureController::class, 'getReferantByStructureID']);
 Route::get('/structures/{structureId}/actions', [StructureController::class, 'getActionsByStructure']);
 Route::post('/structures/{structureId}/add-action', [StructureController::class, 'addActionToStructure']);
+
+
+Route::get('/sceances/session/{session_id}', [SceanceController::class, 'getSceanceBySessionID']);
+Route::get('/sessions/action/{action_id}', [SessionController::class, 'getSessionByActionID']);
