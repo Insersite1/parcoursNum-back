@@ -13,17 +13,14 @@ use App\Models\Question;
 
 class ReponseController extends Controller
 {
-    //
-    /**
-     * Enregistrer une réponse à une question
-     */
+/**
+ * Description: Crée une nouvelle réponse pour une question donnée.
+ * Méthode: POST
+ * Entrée: question_id (identifiant de la question), texte_reponse (texte de la réponse)
+ * Sortie: La réponse créée + statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
+ */
     public function store(Request $request)
     {
-        // Vérification que l'utilisateur est propriétaire de la réponse
-        /*$user = auth()->user();
-        if (!$user || $user->role !== 'Jeune') {
-            return response()->json(['error' => 'Accès non autorisé. Seul le Référent peut créer des sondages.'], 403);
-        }*/
         $validated = $request->validate([
             'question_id' => 'required|exists:questions,id',
             'texte_reponse' => 'required|string'
@@ -34,7 +31,6 @@ class ReponseController extends Controller
 
             $reponse = Reponse::create([
                 ...$validated,
-                //'user_id' => auth()->id()
             ]);
 
             DB::commit();
@@ -48,10 +44,12 @@ class ReponseController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * lister toutes les réponses d'un sondage
-     */
+/**
+ * Description: Récupère toutes les réponses associées à un sondage.
+ * Méthode: GET
+ * Entrée: sondage (l'instance du sondage dont les réponses doivent être récupérées)
+ * Sortie: Liste des réponses avec leurs questions et utilisateurs associés + statut 200 en cas de succès.
+ */
     public function getReponsesSondage(Sondage $sondage)
     {
         $reponses = Reponse::whereHas('question', function($query) use ($sondage) {
@@ -60,21 +58,14 @@ class ReponseController extends Controller
 
         return response()->json($reponses);
     }
-
-    /**
-     * Met à jour une réponse
-     * @param Request $request
-     * @param Reponse $reponse
-     * @return \Illuminate\Http\JsonResponse
-     */
+/**
+ * Description: Met à jour une réponse existante.
+ * Méthode: PUT
+ * Entrée: reponse (l'instance de la réponse à mettre à jour), texte_reponse (texte de la réponse mis à jour)
+ * Sortie: Message de confirmation de mise à jour de la réponse + statut 200 en cas de succès, message d'erreur + statut 500 en cas d'échec.
+ */
     public function update(Request $request, Reponse $reponse)
     {
-        // Vérification que l'utilisateur est propriétaire de la réponse
-        /*$user = auth()->user();
-        if (!$user || $user->role !== 'Jeune') {
-            return response()->json(['error' => 'Accès non autorisé. Seul le Référent peut créer des sondages.'], 403);
-        }*/
-
         $validated = $request->validate([
             'texte_reponse' => 'required|string'
         ]);
@@ -100,16 +91,14 @@ class ReponseController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Affiche les détails d'une réponse spécifique
-     * 
-     * @param Reponse $reponse
-     * @return \Illuminate\Http\JsonResponse
-     */
+/**
+ * Description: Récupère les détails d'une réponse spécifique.
+ * Méthode: GET
+ * Entrée: reponse (l'instance de la réponse à afficher)
+ * Sortie: Détails de la réponse, question associée et utilisateur + statut 200 en cas de succès.
+ */
     public function show(Reponse $reponse)
     {
-        // Charger les relations associées (par exemple, question et utilisateur)
         $reponse->load(['question', 'user']);
 
         return response()->json([

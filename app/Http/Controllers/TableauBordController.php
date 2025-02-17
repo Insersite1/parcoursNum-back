@@ -13,17 +13,16 @@ use Illuminate\Support\Facades\DB;
 
 class TableauBordController extends Controller
 {
-    /**
-     * Récupère les totaux pour chaque attribut (EPC, ETH, API, etc.) pour les utilisateurs ayant le rôle "Jeune".
-     *
-     * @return JsonResponse Résultats sous forme de JSON avec les totaux pour chaque attribut.
-     */
+/**
+ * Description: Cette méthode récupère le nombre d'utilisateurs (Jeunes) associés à chaque critère EPC, ETH, API, ZRR, AE et QP.
+ * Méthode: GET
+ * Sortie:
+ *    - Retourne un tableau avec les comptages des utilisateurs pour chaque critère sous forme de JSON.
+ */
     public function getCounts()
     {
-        // Récupérer l'ID du rôle 'Jeune'
         $roleId = Role::where('name', 'Jeune')->value('id');
 
-        // Compter les totaux pour chaque attribut, avec un rôle spécifique
         $counts = [
             'EPC' => User::where('role_id', $roleId)->where('EPC', true)->count(),
             'ETH' => User::where('role_id', $roleId)->where('ETH', true)->count(),
@@ -33,23 +32,19 @@ class TableauBordController extends Controller
             'QP'  => User::where('role_id', $roleId)->where('QP', true)->count(),
         ];
 
-        // Retourner les résultats sous forme de réponse JSON
         return response()->json($counts);
     }
-
-    /**
-     * Récupère le nombre d'utilisateurs par région.
-     *
-     * @return JsonResponse Résultats sous forme de tableau avec 'region' et 'nombre'.
-     */
+/**
+ * Description: Cette méthode récupère le nombre d'utilisateurs par région.
+ * Méthode: GET
+ * Sortie:
+ *    - Retourne un tableau contenant le nom de la région et le nombre d'utilisateurs associés à chaque région sous forme de JSON.
+ */
     public function getUsersByRegion()
     {
-        // Requête pour compter les utilisateurs par région
         $usersByRegion = User::select('region', DB::raw('COUNT(*) as nombre'))
             ->groupBy('region')
             ->get();
-
-        // Formater le résultat sous forme de tableau à deux colonnes
         $formattedResult = $usersByRegion->map(function ($item) {
             return [
                 'region' => $item->region,
@@ -59,43 +54,39 @@ class TableauBordController extends Controller
 
         return response()->json($formattedResult);
     }
-
-    /**
-     * Récupère le nombre d'utilisateurs (jeunes) associés à chaque action.
-     *
-     * @return JsonResponse Résultats sous forme de tableau avec le nom de l'action et le nombre de jeunes associés.
-     */
+/**
+ * Description: Cette méthode récupère le nombre de jeunes associés à chaque action.
+ * Méthode: GET
+ * Sortie:
+ *    - Retourne un tableau contenant les noms des actions et le nombre de jeunes associés à chaque action sous forme de JSON.
+ */
     public function getJeunesByAction()
     {
-        // Requête pour récupérer les actions avec le nombre de jeunes associés
         $result = DB::table('action_user')
-            ->join('users', 'action_user.user_id', '=', 'users.id') // Joindre avec la table des utilisateurs
-            ->join('actions', 'action_user.action_id', '=', 'actions.id') // Joindre avec la table des actions
-            ->where('users.role_id', 2) // Filtrer uniquement les utilisateurs avec le rôle "Jeune" (ID 2)
-            ->select('actions.nom as action_name', DB::raw('COUNT(action_user.user_id) as jeunes_count')) // Récupérer le nom de l'action et le nombre de jeunes
-            ->groupBy('actions.nom') // Grouper par nom de l'action
+            ->join('users', 'action_user.user_id', '=', 'users.id') 
+            ->join('actions', 'action_user.action_id', '=', 'actions.id') 
+            ->where('users.role_id', 2) 
+            ->select('actions.nom as action_name', DB::raw('COUNT(action_user.user_id) as jeunes_count')) 
+            ->groupBy('actions.nom') 
             ->get();
 
-        // Retourner le résultat en JSON
         return response()->json($result);
     }
 
-    /**
-     * Récupère le nombre de jeunes associés à chaque dispositif.
-     *
-     * @return JsonResponse Résultats sous forme de tableau avec le nom du dispositif et le nombre de jeunes.
-     */
+/**
+ * Description: Cette méthode récupère le nombre de jeunes associés à chaque dispositif.
+ * Méthode: GET
+ * Sortie:
+ *    - Retourne un tableau contenant les dispositifs et le nombre de jeunes associés sous forme de JSON.
+ */
     public function nombreJeunesParDispositif(): JsonResponse
     {
-        // Récupérer le rôle "jeune"
         $roleJeune = Role::where('name', 'Jeune')->first();
 
-        // Récupérer les dispositifs avec le nombre de "jeunes" associés
         $dispositifs = Dispositif::with(['structures.users' => function ($query) use ($roleJeune) {
             $query->where('role_id', $roleJeune->id);
         }])->get();
 
-        // Préparer les résultats
         $resultats = $dispositifs->map(function ($dispositif) {
             $nombreJeunes = $dispositif->structures->sum(function ($structure) {
                 return $structure->users->count();
@@ -109,27 +100,22 @@ class TableauBordController extends Controller
 
         return response()->json($resultats);
     }
+/**
+ * Description: Cette méthode récupère la répartition des jeunes par tranche d'âge et par sexe.
+ * Méthode: GET
+ * Entrée:
+ *    - Aucun paramètre d'entrée spécifique, sauf que la méthode cherche les jeunes ayant le rôle "Jeune" (rôle identifié par 'Jeune' dans la base de données).
+ * Sortie:
+ *    - Retourne une répartition par tranche d'âge, incluant le nombre de jeunes hommes et femmes dans chaque tranche, sous forme de JSON.
+ */
 
-    /**
-     * Renvoie la distribution des utilisateurs ayant le rôle "Jeune" par tranches d'âge et par sexe.
-     *
-     * - Récupère les utilisateurs avec le rôle "Jeune".
-     * - Classe ces utilisateurs dans des tranches d'âge prédéfinies.
-     * - Calcule le nombre d'hommes et de femmes dans chaque tranche.
-     * - Retourne un tableau JSON contenant la répartition.
-     *
-     * @return JsonResponse Répartition par tranche d'âge et sexe.
-     */
 public function distributionJeunesByAge(): JsonResponse
 {
-    // Récupérer l'ID du rôle "Jeune"
     $roleId = Role::where('name', 'Jeune')->value('id');
 
-    // Vérifier si le rôle existe
     if (!$roleId) {
         return response()->json(['error' => 'Rôle "Jeune" non trouvé'], 404);
     }
-    // Définir les tranches d'âge
     $tranches = [
         '<14' => [0, 14],
         '15-19' => [15, 19],
@@ -144,15 +130,14 @@ public function distributionJeunesByAge(): JsonResponse
     $distribution = [];
 
     foreach ($tranches as $tranche => [$minAge, $maxAge]) {
-        // Calculer le nombre d'hommes et de femmes dans chaque tranche d'age au niveau des jeunes
         $hommes = User::where('role_id', $roleId)
-            ->where('sexe', 'M') // Homme
+            ->where('sexe', 'M') 
             ->whereNotNull("dateNaissance")
             ->whereRaw('EXTRACT(YEAR FROM AGE("dateNaissance")) BETWEEN ? AND ?', [$minAge, $maxAge])
             ->count();
         ;
         $femmes = User::where('role_id', $roleId)
-            ->where('sexe', 'F') // Femme
+            ->where('sexe', 'F')
             ->whereNotNull("dateNaissance")
             ->whereRaw('EXTRACT(YEAR FROM AGE("dateNaissance")) BETWEEN ? AND ?', [$minAge, $maxAge])
             ->count();

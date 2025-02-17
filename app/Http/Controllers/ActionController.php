@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Action;
 use App\Models\StructureDispositif;
 use App\Models\User;
@@ -12,20 +11,16 @@ use Illuminate\Support\Facades\Storage;
 class ActionController extends Controller
 {
     /**
-     * Liste paginée des actions.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Description: Retourne une liste paginée des actions avec leurs relations.
+     * Méthode: GET
+     * Entrée: per_page (optionnel) pour spécifier le nombre d'éléments par page.
+     * Sortie: Liste paginée des actions avec métadonnées de pagination.
      */
     public function index(Request $request)
     {
-        // Nombre d'actions par page (par défaut : 10)
         $perPage = $request->get('per_page', 10);
-
-        // Récupérer les actions paginées avec les relations nécessaires
         $actions = Action::with(['structureDispositif', 'user'])->paginate($perPage);
 
-        // Retourner la réponse JSON avec pagination
         return response()->json([
             'data' => $actions->items(),
             'total_pages' => $actions->lastPage(),
@@ -36,10 +31,10 @@ class ActionController extends Controller
     }
 
     /**
-     * Afficher une action spécifique.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * Description: Afficher une action spécifique par son identifiant.
+     * Méthode: GET
+     * Entrée: id (identifiant de l'action)
+     * Sortie: Détails de l'action + statut 200 si trouvée, message d'erreur + statut 404 sinon.
      */
     public function show($id)
     {
@@ -52,97 +47,68 @@ class ActionController extends Controller
         return response()->json($action, 200);
     }
 
-
     /**
-     * Créer une nouvelle action.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Description: Créer une nouvelle action.
+     * Méthode: POST
+     * Entrée: Données de l'action incluant nom, place, type, dates, description, couleur, structure, dispositif, auteur.
+     * Sortie: Nouvelle action créée + statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
      */
+    public function store(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'couverture' => 'nullable|mimes:jpeg,png,jpg,gif',
+                'nom' => 'required|string',
+                'place' => 'required|string',
+                'type' => 'required|string',
+                'DateDebut' => 'required|date',
+                'DateFin' => 'required|date|after_or_equal:DateDebut',
+                'description' => 'required|string',
+                'couleur' => 'required|string',
+                'users' => 'nullable|array',
+                'users.*' => 'required|integer|exists:users,id',
+                'structure_id' => 'required|exists:structures,id',
+                'dispositif_id' => 'required|exists:dispositifs,id',
+                'auteur' => 'required|string',
+            ]);
 
+            $structureDispositif = StructureDispositif::firstOrCreate([
+                'structure_id' => $validatedData['structure_id'],
+                'dispositif_id' => $validatedData['dispositif_id'],
+            ]);
 
-     public function store(Request $request)
-     {
-         try {
-             // Validation des données
-             $validatedData = $request->validate([
-                 'couverture' => 'nullable|mimes:jpeg,png,jpg,gif', // Ajout d'une limite de taille 2MB
-                 'nom' => 'required|string',
-                 'place' => 'required|string',
-                 'type' => 'required|string',
-                 'DateDebut' => 'required|date',
-                 'DateFin' => 'required|date|after_or_equal:DateDebut',
-                 'description' => 'required|string',
-                 'couleur' => 'required|string',
-                 'users' => 'nullable|array',
-                 'users.*' => 'required|integer|exists:users,id',
-                 'structure_id' => 'required|exists:structures,id',
-                 'dispositif_id' => 'required|exists:dispositifs,id',
-                 'auteur' => 'required|string',
-                //  'statut' => 'in:Active,Inactive',
-             ]);
+            $validatedData['structure_dispositif_id'] = $structureDispositif->id;
+            $userId = $validatedData['users'][0] ?? null;
 
-             // Validation ou création de l'association structure_dispositif
-             $structureDispositif = StructureDispositif::firstOrCreate([
-                 'structure_id' => $validatedData['structure_id'],
-                 'dispositif_id' => $validatedData['dispositif_id'],
-             ]);
-
-             // Ajoutez l'ID du structure_dispositif dans les données validées
-             $validatedData['structure_dispositif_id'] = $structureDispositif->id;
-
-             // Vérifiez si des utilisateurs sont associés
-             $userId = null;
-             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
-                 $userId = $validatedData['users'][0];
-             }
-
-             // Créez l'action
-             $action = new Action();
+            $action = new Action();
             if ($request->hasFile('couverture')) {
                 $couverture = $request->file('couverture');
                 $avatarName = time() . '.' . $couverture->extension();
                 $couverture->move(public_path('images'), $avatarName);
-                 $action->couverture = $avatarName;
+                $action->couverture = $avatarName;
             }
-             $action->nom = $validatedData['nom'];
-             $action->place = $validatedData['place'];
-             $action->type = $validatedData['type'];
-             $action->DateDebut = $validatedData['DateDebut'];
-             $action->DateFin = $validatedData['DateFin'];
-             $action->description = $validatedData['description'];
-             $action->couleur = $validatedData['couleur'];
-             $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
-             $action->auteur = $validatedData['auteur'];
-             $action->statut = "Active";
-             $action->user_id = $userId;
+            $action->fill($validatedData);
+            $action->statut = "Active";
+            $action->user_id = $userId;
+            $action->save();
 
-             // Sauvegardez l'action
-             $action->save();
+            if (isset($validatedData['users'])) {
+                $action->users()->attach($validatedData['users']);
+            }
 
-             // Attachez d'autres utilisateurs à l'action
-             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
-                 $action->users()->attach($validatedData['users']);
-             }
-
-             return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
-         } catch (\Illuminate\Validation\ValidationException $e) {
-             return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-         } catch (\Exception $e) {
-             return response()->json([
-                 'message' => 'Une erreur est survenue lors de la création de l\'action.',
-                 'error' => $e->getMessage(),
-             ], 500);
-         }
-     }
-
+            return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
     /**
-     * Mettre à jour une action existante.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * Description: Mettre à jour une action existante.
+     * Méthode: PUT/PATCH
+     * Entrée: id (identifiant de l'action) + champs modifiés.
+     * Sortie: Action mise à jour + statut 200 en cas de succès, message d'erreur + statut 404 si non trouvée.
      */
     public function update(Request $request, $id)
     {
@@ -160,9 +126,7 @@ class ActionController extends Controller
             'fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        // Gérer le fichier s'il existe
         if ($request->hasFile('fichier')) {
-            // Supprimer l'ancien fichier
             if ($action->fichier) {
                 Storage::delete($action->fichier);
             }
@@ -176,10 +140,10 @@ class ActionController extends Controller
     }
 
     /**
-     * Supprimer une action.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * Description: Supprimer une action existante.
+     * Méthode: DELETE
+     * Entrée: id (identifiant de l'action)
+     * Sortie: Message de confirmation + statut 200 en cas de succès, message d'erreur + statut 404 si non trouvée.
      */
     public function destroy($id)
     {
@@ -189,7 +153,6 @@ class ActionController extends Controller
             return response()->json(['message' => 'Action non trouvée'], 404);
         }
 
-        // Supprimer le fichier associé s'il existe
         if ($action->fichier) {
             Storage::delete($action->fichier);
         }
@@ -198,7 +161,4 @@ class ActionController extends Controller
 
         return response()->json(['message' => 'Action supprimée avec succès'], 200);
     }
-
-
-
 }
