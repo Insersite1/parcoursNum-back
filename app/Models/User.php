@@ -141,4 +141,20 @@ public function dispositif()
         // TODO: Implement getJWTCustomClaims() method.
         return [];
     }
+
+
+    /**
+     * Relation avec le model sceance et session
+     * Liste des Séances d’un Jeune (getSeanceByJeuneID) barry
+     * Liste des Session d’un Jeune (getSessionByJeuneID) barry
+     */
+    public function sessions()
+    {
+        return $this->belongsToMany(Session::class, 'session_user');
+    }
+
+    public function sceance()
+    {
+        return $this->belongsToMany(Sceance::class, 'sceance_user');
+    }
 }
