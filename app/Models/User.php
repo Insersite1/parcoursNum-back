@@ -8,11 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\Contracts\Providers\JWT;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\Contracts\Providers\JWT;
 
-class User extends Authenticatable implements JWTSubject
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -28,8 +24,6 @@ class User extends Authenticatable implements JWTSubject
             'nom',
             'Prenom',
             'email',
-            'dateNaissance',
-            'dateNaissance',
             'numTelephone',
             'email_verified_at',
             'password',
@@ -56,7 +50,6 @@ class User extends Authenticatable implements JWTSubject
             'structure_id',
             'accepter_conditions',
             'dispositif_id',
-            'dateNaissance',
     ];
 
     public function structure()
@@ -72,7 +65,15 @@ public function dispositif()
     /**
      * Relation avec le modèle Action
      */
-   public function actions()
+   /* public function actions()
+    {
+        return $this->hasMany(Action::class, 'action_id');
+    }*/
+ /*   public function actionUser()
+    {
+        return $this->hasMany(ActionUser::class, 'user_id');
+    }*/
+    public function actions()
     {
         return $this->hasMany(Action::class, 'user_id');
     }
@@ -82,7 +83,7 @@ public function dispositif()
     }
     public function session()
     {
-        return $this->hasMany(Action::class,'action_id');
+        return $this->hasMany(Action::class,'session_id');
     }
 
    
@@ -92,10 +93,7 @@ public function dispositif()
     {
     return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
-    public function sceances()
-    {
-        return $this->hasMany(Sceance::class, 'user_id');
-    }
+
 
 
 
@@ -117,44 +115,21 @@ public function dispositif()
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
     public function getJWTIdentifier()
     {
-        // TODO: Implement getJWTIdentifier() method.
         return $this->getKey();
     }
 
     public function getJWTCustomClaims()
     {
-        // TODO: Implement getJWTCustomClaims() method.
         return [];
     }
-
-    public function getJWTIdentifier()
-    {
-        // TODO: Implement getJWTIdentifier() method.
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        // TODO: Implement getJWTCustomClaims() method.
-        return [];
-    }
-
 
     /**
-     * Relation avec le model sceance et session
-     * Liste des Séances d’un Jeune (getSeanceByJeuneID) barry
-     * Liste des Session d’un Jeune (getSessionByJeuneID) barry
+     * Relation avec le model Sondage: Un référent peut créer plusieurs sondages.
      */
-    public function sessions()
+    public function sondages()
     {
-        return $this->belongsToMany(Session::class, 'session_user');
-    }
-
-    public function sceance()
-    {
-        return $this->belongsToMany(Sceance::class, 'sceance_user');
+        return $this->hasMany(Sondage::class);
     }
 }
