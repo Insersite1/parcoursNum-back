@@ -65,19 +65,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-//sceance
-Route::apiResource('sceances', SceanceController::class);
-//session
-Route::apiResource('sessions', SessionController::class);
-// Route de recherche de session
-Route::get('sessions/find/{search}', [SessionController::class, 'search']);
-
-//sceance
-Route::apiResource('sceances', SceanceController::class);
-//session
-Route::apiResource('sessions', SessionController::class);
-// Route de recherche de session
-Route::get('sessions/find/{search}', [SessionController::class, 'search']);
 
 
 /// Action
