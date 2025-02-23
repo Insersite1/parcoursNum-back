@@ -183,7 +183,19 @@ class SessionController extends Controller
         return response()->json($sessions);
     }
 
+    public function getSceanceBySessionID($session_id)
+    {
+        // Recherche toutes les séances associées à la session donnée
+        $sceances = Sceance::where('session_id', $session_id)->get();
 
+        // Vérifie si aucune séance n'a été trouvée pour cette session
+        if ($sceances->isEmpty()) {
+            return response()->json(['message' => 'Aucune séance trouvée pour cette session'], 404);
+        }
+
+        // Retourne les séances trouvées au format JSON
+        return response()->json($sceances);
+    }
 
 }
 

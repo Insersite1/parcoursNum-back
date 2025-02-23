@@ -186,6 +186,11 @@ Route::get('/structures/{structureId}/referants', [StructureController::class, '
 Route::get('/structures/{structureId}/actions', [StructureController::class, 'getActionsByStructure']);
 Route::post('/structures/{structureId}/add-action', [StructureController::class, 'addActionToStructure']);
 
+
+Route::get('/sceances/session/{session_id}', [SceanceController::class, 'getSceanceBySessionID']);
+Route::get('/sessions/action/{action_id}', [SessionController::class, 'getSessionByActionID']);
+
+
 /**
  * API
  * Liste des Séances d’un Jeune (getSeanceByJeuneID) barry
