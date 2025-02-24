@@ -66,12 +66,6 @@ class JeuneController extends Controller
              ], 401);
          }
 
-         // Vérifier si l'utilisateur connecté a le rôle de manager (role_id = 3)
-         if (!isset($currentUser->role_id) || $currentUser->role -> name != "manager") {
-             return response()->json([
-                 'message' => 'Accès interdit. Seuls les managers peuvent créer des jeunes.',
-             ], 403);
-         }
 
          // Validation des données
          $validatedData = $request->validate([
@@ -102,7 +96,7 @@ class JeuneController extends Controller
          $user->password = bcrypt('passer123');
          $user->statut = 'Active';
          // Attribuer dynamiquement l'ID du rôle "jeune"
-         $roleJeune = Role::where('name', 'jeune')->first();
+         $roleJeune = Role::where('name', 'Jeune')->first();
          if ($roleJeune) {
              $user->role_id = $roleJeune->id;
          } else {

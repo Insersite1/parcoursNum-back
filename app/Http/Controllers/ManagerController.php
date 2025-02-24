@@ -114,11 +114,6 @@ class ManagerController extends Controller
         try {
             $currentUser = Auth::user();
 
-            if (!$currentUser || $currentUser->role->name != 'manager') {
-                return response()->json([
-                    'message' => 'Accès interdit. Seuls les managers peuvent voir cette liste.',
-                ], 403);
-            }
 
             $roleJeune = Role::where('name', 'jeune')->first();
             if (!$roleJeune) {

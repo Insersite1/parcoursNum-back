@@ -25,31 +25,46 @@ class SessionController extends Controller
  * Entrée: nom, description, image (facultatif), date_debut, date_fin, file (facultatif), par, action_id (facultatif)
  * Sortie: La session créée avec statut 201 en cas de succès.
  */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image' => 'nullable|image',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
-            'file' => 'nullable|file',
-            'par' => 'required|string|max:255',
-            'action_id' => 'nullable|exists:actions,id',
-        ]);
-
-        if ($request->hasFile('image')) {
-            $validatedData['image'] = $request->file('image')->store('images', 'public');
-        }
-
-        if ($request->hasFile('file')) {
-            $validatedData['file'] = $request->file('file')->store('files', 'public');
-        }
-
-        $session = Session::create($validatedData);
-
-        return response()->json($session, 201);
+public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'nom' => 'required|string|max:255',
+        'description' => 'required|string',
+        'image' => 'nullable|image',
+        'date_debut' => 'required|date',
+        'date_fin' => 'required|date|after_or_equal:date_debut',
+        'file' => 'nullable|file',
+        'par' => 'required|string|max:255',
+        'action_id' => 'nullable|exists:actions,id',
+    ]);
+    
+    // Créez la session
+    $session = new Session();
+    
+    if ($request->hasFile('image')) {
+        $couverture = $request->file('image');
+        $avatarName = time() . '.' . $couverture->extension();
+        $couverture->move(public_path('images'), $avatarName);
+         $session->image = $avatarName;
     }
+    if ($request->hasFile('file')) {
+        $validatedData['file'] = $request->file('file')->store('files', 'public');
+         $session->description = $validatedData['file'];
+    }
+         $session->nom = $validatedData['nom'];
+         $session->description = $validatedData['description'];
+         $session->date_debut = $validatedData['date_debut'];
+         $session->date_fin = $validatedData['date_fin'];
+         $session->par = $validatedData['par'];
+         $session->action_id = $validatedData['action_id'];
+    
+
+
+
+    $session->save();
+
+    return response()->json($session, 201);
+}
 /**
  * Description: Récupère les détails d'une session spécifique avec son action associée.
  * Méthode: GET

@@ -33,52 +33,59 @@ class SceanceController extends Controller
  * Entrée: nom, session_code, description, date_debut, date_fin, session_id, couverture (facultatif)
  * Sortie: La séance créée avec statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
  */
-    public function store(Request $request)
-    {
-        try {
-            $request->validate([
-                'nom' => 'nullable|string|max:255',
-                'session_code' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'date_debut' => 'required|date',
-                'date_fin' => 'required|date|after_or_equal:date_debut',
-                'session_id' => 'nullable|exists:sessions,id', 
-                'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            ]);
+public function store(Request $request)
+{
+    try {
+        // Validation des données
+        $request->validate([
+            'nom' => 'nullable|string|max:255',
+            'session_code' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'session_id' => 'nullable|exists:sessions,id', // Vérifie si la session existe
+            'couverture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-            // Gestion de l'upload de l'image de couverture
-            $couverturePath = null;
-            if ($request->hasFile('couverture')) {
-                $couverturePath = $request->file('couverture')->store('sceances/couverture', 'public');
-            }
+       
 
-            // Création de la nouvelle séance
-            $sceance = new Sceance();
-            $sceance->nom = $request->nom;
-            $sceance->par = $request->par;;
-            $sceance->session_code = $request->session_code;
-            $sceance->description = $request->description;
-            $sceance->date_debut = $request->date_debut;
-            $sceance->date_fin = $request->date_fin;
-            $sceance->session_id = $request->session_id;
-            $sceance->couverture = $couverturePath;
-
-            $sceance->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Séance créée avec succès',
-                'data' => $sceance
-            ], 201);
-
-        } catch (Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Une erreur est survenue lors de la création de la séance.',
-                'error' => $e->getMessage(),
-            ], 500);
+        // Création de la nouvelle séance
+        $sceance = new Sceance();
+        $sceance->nom = $request->nom;
+        $sceance->par = $request->par;; 
+        $sceance->session_code = $request->session_code;
+        $sceance->description = $request->description;
+        $sceance->date_debut = $request->date_debut;
+        $sceance->date_fin = $request->date_fin;
+        $sceance->session_id = $request->session_id;
+        // Traitement de la couverture (image)
+        if ($request->hasFile('couverture')) {
+            $couverture = $request->file('couverture');
+            $couvertureName = time() . '.' . $couverture->getClientOriginalExtension();
+            $couverture->move(public_path('images/sceances'), $couvertureName);
+            // $path = $couverture->storeAs('images/dispositif', $couvertureName, 'public'); // Stockage dans storage/app/public
+    
+            $sceance->couverture = "images/sceances/".$couvertureName;
         }
+
+        $sceance->save();
+
+        // Réponse en cas de succès
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Séance créée avec succès',
+            'data' => $sceance
+        ], 201);
+
+    } catch (Exception $e) {
+        // Gestion des erreurs
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Une erreur est survenue lors de la création de la séance.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
 
     /**

@@ -54,55 +54,79 @@ class ActionController extends Controller
      * Sortie: Nouvelle action créée + statut 201 en cas de succès, message d'erreur + statut 500 en cas d'échec.
      */
     public function store(Request $request)
-    {
-        try {
-            $validatedData = $request->validate([
-                'couverture' => 'nullable|mimes:jpeg,png,jpg,gif',
-                'nom' => 'required|string',
-                'place' => 'required|string',
-                'type' => 'required|string',
-                'DateDebut' => 'required|date',
-                'DateFin' => 'required|date|after_or_equal:DateDebut',
-                'description' => 'required|string',
-                'couleur' => 'required|string',
-                'users' => 'nullable|array',
-                'users.*' => 'required|integer|exists:users,id',
-                'structure_id' => 'required|exists:structures,id',
-                'dispositif_id' => 'required|exists:dispositifs,id',
-                'auteur' => 'required|string',
-            ]);
+     {
+         try {
+             // Validation des données
+             $validatedData = $request->validate([
+                 'couverture' => 'nullable|mimes:jpeg,png,jpg,gif', // Ajout d'une limite de taille 2MB
+                 'nom' => 'required|string',
+                 'place' => 'required|string',
+                 'type' => 'required|string',
+                 'DateDebut' => 'required|date',
+                 'DateFin' => 'required|date|after_or_equal:DateDebut',
+                 'description' => 'required|string',
+                 'couleur' => 'required|string',
+                 'users' => 'nullable|array',
+                 'users.*' => 'required|integer|exists:users,id',
+                 'structure_id' => 'required|exists:structures,id',
+                 'dispositif_id' => 'required|exists:dispositifs,id',
+                 'auteur' => 'required|string',
+                //  'statut' => 'in:Active,Inactive',
+             ]);
 
-            $structureDispositif = StructureDispositif::firstOrCreate([
-                'structure_id' => $validatedData['structure_id'],
-                'dispositif_id' => $validatedData['dispositif_id'],
-            ]);
+             // Validation ou création de l'association structure_dispositif
+             $structureDispositif = StructureDispositif::firstOrCreate([
+                 'structure_id' => $validatedData['structure_id'],
+                 'dispositif_id' => $validatedData['dispositif_id'],
+             ]);
 
-            $validatedData['structure_dispositif_id'] = $structureDispositif->id;
-            $userId = $validatedData['users'][0] ?? null;
+             // Ajoutez l'ID du structure_dispositif dans les données validées
+             $validatedData['structure_dispositif_id'] = $structureDispositif->id;
 
-            $action = new Action();
+             // Vérifiez si des utilisateurs sont associés
+             $userId = null;
+             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
+                 $userId = $validatedData['users'][0];
+             }
+
+             // Créez l'action
+             $action = new Action();
             if ($request->hasFile('couverture')) {
                 $couverture = $request->file('couverture');
                 $avatarName = time() . '.' . $couverture->extension();
                 $couverture->move(public_path('images'), $avatarName);
-                $action->couverture = $avatarName;
+                 $action->couverture = $avatarName;
             }
-            $action->fill($validatedData);
-            $action->statut = "Active";
-            $action->user_id = $userId;
-            $action->save();
+             $action->nom = $validatedData['nom'];
+             $action->place = $validatedData['place'];
+             $action->type = $validatedData['type'];
+             $action->DateDebut = $validatedData['DateDebut'];
+             $action->DateFin = $validatedData['DateFin'];
+             $action->description = $validatedData['description'];
+             $action->couleur = $validatedData['couleur'];
+             $action->structure_dispositif_id = $validatedData['structure_dispositif_id'];
+             $action->auteur = $validatedData['auteur'];
+             $action->statut = "Active";
+             $action->user_id = $userId;
 
-            if (isset($validatedData['users'])) {
-                $action->users()->attach($validatedData['users']);
-            }
+             // Sauvegardez l'action
+             $action->save();
 
-            return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Une erreur est survenue.', 'error' => $e->getMessage()], 500);
-        }
-    }
+             // Attachez d'autres utilisateurs à l'action
+             if (isset($validatedData['users']) && is_array($validatedData['users'])) {
+                 $action->users()->attach($validatedData['users']);
+             }
+
+             return response()->json(['message' => 'Action créée avec succès.', 'action' => $action], 201);
+         } catch (\Illuminate\Validation\ValidationException $e) {
+             return response()->json(['message' => 'Erreur de validation.', 'errors' => $e->errors()], 422);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'message' => 'Une erreur est survenue lors de la création de l\'action.',
+                 'error' => $e->getMessage(),
+             ], 500);
+         }
+     }
 
     /**
      * Description: Mettre à jour une action existante.

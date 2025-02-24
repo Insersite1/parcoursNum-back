@@ -32,20 +32,44 @@ class DispositifController extends Controller
      *  - pays (string, requis)
      * Sortie: Données du dispositif créé avec un statut 201 ou erreurs de validation avec un statut 422.
      */
+    // Créer un nouveau dispositif
     public function store(Request $request)
     {
+        // Validation des données
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'couverture' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
+            'couverture' => 'nullable|mimes:jpeg,png,jpg,gif', // Ajout d'une limite de taille 2MB
             'DateDebut' => 'required|date',
-            'DateFin' => 'required|date|after_or_equal:DateDebut',
+            'DateFin' => 'required|date|after_or_equal:datedebut',
             'statut' => 'required|in:Active,Inactive',
             'pays' => 'required|string|max:255',
         ]);
+    
+        // Vérifier si la validation échoue
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-        $dispositif = Dispositif::create($request->all());
+    
+        // Création d'un nouvel objet Dispositif
+        $dispositif = new Dispositif();
+        $dispositif->name = $request->name;
+        $dispositif->DateDebut = $request->DateDebut;
+        $dispositif->DateFin = $request->DateFin;
+        $dispositif->statut = $request->statut;
+        $dispositif->pays = $request->pays;
+    
+        // Traitement de la couverture (image)
+        if ($request->hasFile('couverture')) {
+            $couverture = $request->file('couverture');
+            $couvertureName = time() . '.' . $couverture->getClientOriginalExtension();
+            $couverture->move(public_path('images/dispositif'), $couvertureName);
+            // $path = $couverture->storeAs('images/dispositif', $couvertureName, 'public'); // Stockage dans storage/app/public
+    
+            $dispositif->couverture = "images/dispositif/".$couvertureName;
+        }
+    
+        // Sauvegarder dans la base de données
+        $dispositif->save();
     
         return response()->json($dispositif, 201);
     }
