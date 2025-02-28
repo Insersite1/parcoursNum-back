@@ -20,18 +20,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        $this->call([
-            RoleSeeder::class,
-            SuperAdminSeeder::class,
-            ManagerSeeder::class,
-            JeuneSeeder::class,
-            StructureSeeder::class,
-            SceanceUserSeeder::class,
-            SessionUserSeeder::class,
-            SessionSeeder::class,
-            SceanceSeeder::class,
-
-        ]);
+        
         $this->call([
              UserSeeder::class,
         ]);
